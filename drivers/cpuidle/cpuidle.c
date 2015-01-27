@@ -125,6 +125,9 @@ int cpuidle_enter_state(struct cpuidle_device *dev, struct cpuidle_driver *drv,
 	ktime_t time_start, time_end;
 	s64 diff;
 
+	/* Take note of the planned idle state. */
+	sched_idle_set_state(target_state, index);
+
 	trace_cpu_idle_rcuidle(index, dev->cpu);
 	time_start = ktime_get();
 
@@ -133,7 +136,10 @@ int cpuidle_enter_state(struct cpuidle_device *dev, struct cpuidle_driver *drv,
 	time_end = ktime_get();
 	trace_cpu_idle_rcuidle(PWR_EVENT_EXIT, dev->cpu);
 
-	if (!cpuidle_state_is_coupled(dev, drv, index))
+	/* The cpu is no longer idle or about to enter idle. */
+	sched_idle_set_state(NULL, -1);
+
+	if (!cpuidle_state_is_coupled(dev, drv, entered_state))
 		local_irq_enable();
 
 	diff = ktime_to_us(ktime_sub(time_end, time_start));
@@ -226,7 +232,7 @@ void cpuidle_uninstall_idle_handler(void)
 {
 	if (enabled_devices) {
 		initialized = 0;
-		wake_up_all_idle_cpus();
+		wake_up_idle_cpus(cpu_online_mask);
 	}
 
 	/*
@@ -538,28 +544,16 @@ EXPORT_SYMBOL_GPL(cpuidle_register);
 
 #ifdef CONFIG_SMP
 
-static void smp_callback(void *v)
-{
-	/* we already woke the CPU up, nothing more to do */
-}
-
 /*
  * This function gets called when a part of the kernel has a new latency
- * requirement.  This means we need to get only those processors out of their
- * C-state for which qos requirement is changed, and then recalculate a new
- * suitable C-state. Just do a cross-cpu IPI; that wakes them all right up.
+ * requirement.  This means we need to get all processors out of their C-state,
+ * and then recalculate a new suitable C-state. Just do a cross-cpu IPI; that
+ * wakes them all right up.
  */
 static int cpuidle_latency_notify(struct notifier_block *b,
 		unsigned long l, void *v)
 {
-	const struct cpumask *cpus;
-
-	cpus = v ?: cpu_online_mask;
-
-	preempt_disable();
-	smp_call_function_many(cpus, smp_callback, NULL, 1);
-	preempt_enable();
-
+	wake_up_idle_cpus((struct cpumask *)v);
 	return NOTIFY_OK;
 }
 
