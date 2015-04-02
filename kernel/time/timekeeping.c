@@ -1249,7 +1249,7 @@ int timekeeping_suspend(void)
 	timekeeping_forward_now(tk);
 	timekeeping_suspended = 1;
 
-	if (persistent_clock_exists) {
+	if (has_persistent_clock()) {
 		/*
 		 * To avoid drift caused by repeated suspend/resumes,
 		 * which each can add ~1 second drift error,
