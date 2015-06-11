@@ -340,13 +340,25 @@ static inline int has_pushable_tasks(struct rq *rq)
 	return !plist_head_empty(&rq->rt.pushable_tasks);
 }
 
-static inline void set_post_schedule(struct rq *rq)
+static DEFINE_PER_CPU(struct callback_head, rt_push_head);
+static DEFINE_PER_CPU(struct callback_head, rt_pull_head);
+
+static void push_rt_tasks(struct rq *);
+static void pull_rt_task(struct rq *);
+
+static inline void queue_push_tasks(struct rq *rq)
 {
-	/*
-	 * We detect this state here so that we can avoid taking the RQ
-	 * lock again later if there is no need to push
-	 */
-	rq->post_schedule = has_pushable_tasks(rq);
+	if (!has_pushable_tasks(rq))
+		return;
+
+	queue_balance_callback(rq, &per_cpu(rt_push_head, rq->cpu),
+		push_rt_tasks);
+}
+
+static inline void queue_pull_task(struct rq *rq)
+{
+	queue_balance_callback(rq, &per_cpu(rt_pull_head, rq->cpu),
+		pull_rt_task);
 }
 
 static void enqueue_pushable_task(struct rq *rq, struct task_struct *p)
@@ -402,7 +414,7 @@ static inline void pull_rt_task(struct rq *this_rq)
 {
 }
 
-static inline void set_post_schedule(struct rq *rq)
+static inline void queue_push_tasks(struct rq *rq)
 {
 }
 #endif /* CONFIG_SMP */
@@ -1660,7 +1672,7 @@ pick_next_task_rt(struct rq *rq, struct task_struct *prev)
 	/* The running task is never eligible for pushing */
 	dequeue_pushable_task(rq, p);
 
-	set_post_schedule(rq);
+	queue_push_tasks(rq);
 
 	return p;
 }
@@ -2107,11 +2119,6 @@ skip:
 		resched_curr(this_rq);
 }
 
-static void post_schedule_rt(struct rq *rq)
-{
-	push_rt_tasks(rq);
-}
-
 /*
  * If we are not running and we are not going to reschedule soon, we should
  * try to push tasks away now
@@ -2205,7 +2212,7 @@ static void switched_from_rt(struct rq *rq, struct task_struct *p)
 	if (!task_on_rq_queued(p) || rq->rt.rt_nr_running)
 		return;
 
-	pull_rt_task(rq);
+	queue_pull_task(rq);
 }
 
 void __init init_sched_rt_class(void)
@@ -2227,8 +2234,6 @@ void __init init_sched_rt_class(void)
  */
 static void switched_to_rt(struct rq *rq, struct task_struct *p)
 {
-	int check_resched = 1;
-
 	/*
 	 * If we are already running, then there's nothing
 	 * that needs to be done. But if we are not running
@@ -2238,13 +2243,12 @@ static void switched_to_rt(struct rq *rq, struct task_struct *p)
 	 */
 	if (task_on_rq_queued(p) && rq->curr != p) {
 #ifdef CONFIG_SMP
-		if (p->nr_cpus_allowed > 1 && rq->rt.overloaded &&
-		    /* Don't resched if we changed runqueues */
-		    push_rt_task(rq) && rq != task_rq(p))
-			check_resched = 0;
-#endif /* CONFIG_SMP */
-		if (check_resched && p->prio < rq->curr->prio)
+		if (p->nr_cpus_allowed > 1 && rq->rt.overloaded)
+			queue_push_tasks(rq);
+#else
+		if (p->prio < rq->curr->prio)
 			resched_curr(rq);
+#endif /* CONFIG_SMP */
 	}
 }
 
@@ -2265,14 +2269,13 @@ prio_changed_rt(struct rq *rq, struct task_struct *p, int oldprio)
 		 * may need to pull tasks to this runqueue.
 		 */
 		if (oldprio < p->prio)
-			pull_rt_task(rq);
+			queue_pull_task(rq);
+
 		/*
 		 * If there's a higher priority task waiting to run
-		 * then reschedule. Note, the above pull_rt_task
-		 * can release the rq lock and p could migrate.
-		 * Only reschedule if p is still on the same runqueue.
+		 * then reschedule.
 		 */
-		if (p->prio > rq->rt.highest_prio.curr && rq->curr == p)
+		if (p->prio > rq->rt.highest_prio.curr)
 			resched_curr(rq);
 #else
 		/* For UP simply resched on drop of prio */
@@ -2383,7 +2386,6 @@ const struct sched_class rt_sched_class = {
 	.set_cpus_allowed       = set_cpus_allowed_rt,
 	.rq_online              = rq_online_rt,
 	.rq_offline             = rq_offline_rt,
-	.post_schedule		= post_schedule_rt,
 	.task_woken		= task_woken_rt,
 	.switched_from		= switched_from_rt,
 #endif
