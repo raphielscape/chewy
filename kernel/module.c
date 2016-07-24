@@ -1144,6 +1144,7 @@ static int check_version(Elf_Shdr *sechdrs,
 {
 	unsigned int i, num_versions;
 	struct modversion_info *versions;
+        versindex = 0;
 
 	/* Exporting module didn't supply crcs?  OK, we're already tainted. */
 	if (!crc)
