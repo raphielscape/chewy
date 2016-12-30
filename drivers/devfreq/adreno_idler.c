@@ -32,6 +32,7 @@
 #include <linux/devfreq.h>
 #include <linux/display_state.h>
 #include <linux/msm_adreno_devfreq.h>
+#include <linux/display_state.h>
 
 #define ADRENO_IDLER_MAJOR_VERSION 1
 #define ADRENO_IDLER_MINOR_VERSION 1
