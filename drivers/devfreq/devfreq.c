@@ -45,7 +45,7 @@ static DEFINE_MUTEX(devfreq_list_lock);
 
 /* List of devices to boost when the screen is woken */
 static const char *boost_devices[] = {
-	"soc:qcom,cpubw",
+	"soc:qcom,cpubw"
 };
 
 #define WAKE_BOOST_DURATION_MS (5000)
@@ -373,6 +373,7 @@ void devfreq_interval_update(struct devfreq *devfreq, unsigned int *delay)
 	unsigned int new_delay = *delay;
 
 	mutex_lock(&devfreq->lock);
+	devfreq->profile->polling_ms = new_delay;
 
 	if (devfreq->stop_polling)
 		goto out;
@@ -482,7 +483,7 @@ struct devfreq *devfreq_add_device(struct device *dev,
 {
 	struct devfreq *devfreq;
 	struct devfreq_governor *governor;
-	int i, err = 0;
+	int err = 0;
 
 	if (!dev || !profile || !governor_name) {
 		dev_err(dev, "%s: Invalid parameters.\n", __func__);
@@ -552,13 +553,6 @@ struct devfreq *devfreq_add_device(struct device *dev,
 		dev_err(dev, "%s: Unable to start governor for the device\n",
 			__func__);
 		goto err_init;
-	}
-
-	for (i = 0; i < ARRAY_SIZE(boost_devices); i++) {
-		if (!strcmp(dev_name(dev), boost_devices[i])) {
-			devfreq->needs_wake_boost = true;
-			break;
-		}
 	}
 
 	return devfreq;
@@ -830,7 +824,7 @@ static ssize_t governor_store(struct device *dev, struct device_attribute *attr,
 	struct devfreq *df = to_devfreq(dev);
 	int ret;
 	char str_governor[DEVFREQ_NAME_LEN + 1];
-	const struct devfreq_governor *governor, *prev_gov;
+	struct devfreq_governor *governor;
 
 	ret = sscanf(buf, "%" __stringify(DEVFREQ_NAME_LEN) "s", str_governor);
 	if (ret != 1)
@@ -862,17 +856,12 @@ static ssize_t governor_store(struct device *dev, struct device_attribute *attr,
 			goto out;
 		}
 	}
-	prev_gov = df->governor;
 	df->governor = governor;
 	strncpy(df->governor_name, governor->name, DEVFREQ_NAME_LEN);
 	ret = df->governor->event_handler(df, DEVFREQ_GOV_START, NULL);
-	if (ret) {
+	if (ret)
 		dev_warn(dev, "%s: Governor %s not started(%d)\n",
 			 __func__, df->governor->name, ret);
-		df->governor = prev_gov;
-		strncpy(df->governor_name, prev_gov->name, DEVFREQ_NAME_LEN);
-		df->governor->event_handler(df, DEVFREQ_GOV_START, NULL);
-	}
 out:
 	mutex_unlock(&devfreq_list_lock);
 
@@ -947,7 +936,6 @@ static ssize_t polling_interval_store(struct device *dev,
 	if (ret != 1)
 		return -EINVAL;
 
-	df->profile->polling_ms = value;
 	df->governor->event_handler(df, DEVFREQ_GOV_INTERVAL, &value);
 	ret = count;
 
@@ -1118,13 +1106,26 @@ static struct attribute *devfreq_attrs[] = {
 };
 ATTRIBUTE_GROUPS(devfreq);
 
+static bool is_boost_device(struct devfreq *df)
+{
+	int i;
+
+	for (i = 0; ARRAY_SIZE(boost_devices); i++) {
+		if (!strncmp(dev_name(&df->dev), boost_devices[i],
+				DEVFREQ_NAME_LEN))
+			return true;
+	}
+
+	return false;
+}
+
 static void set_wake_boost(bool enable)
 {
 	struct devfreq *df;
 
 	mutex_lock(&devfreq_list_lock);
 	list_for_each_entry(df, &devfreq_list, node) {
-		if (!df->needs_wake_boost)
+		if (!is_boost_device(df))
 			continue;
 
 		mutex_lock(&df->lock);
