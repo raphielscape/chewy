@@ -2090,7 +2090,7 @@ VOS_STATUS vos_watchdog_wlan_shutdown(void)
 
     /* Update Riva Reset Statistics */
     pHddCtx->hddRivaResetStats++;
-#ifdef CONFIG_HAS_EARLYSUSPEND
+#if defined(CONFIG_POWERSUSPEND) || defined(CONFIG_HAS_EARLYSUSPEND)
     if(VOS_STATUS_SUCCESS != hdd_wlan_reset_initialization())
     {
        VOS_ASSERT(0);
