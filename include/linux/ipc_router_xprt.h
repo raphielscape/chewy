@@ -108,6 +108,7 @@ struct rr_packet {
 	struct sk_buff_head *pkt_fragment_q;
 	uint32_t length;
 	struct kref ref;
+	bool ws_need;
 };
 
 /**
@@ -125,6 +126,7 @@ struct rr_packet {
  * @close: Method to close the XPRT.
  * @sft_close_done: Method to indicate to the XPRT that handling of reset
  *                  event is complete.
+ * @get_ws_info: Method to get the wakeup soruce inforamtion of the XPRT
  */
 struct msm_ipc_router_xprt {
 	char *name;
@@ -143,6 +145,7 @@ struct msm_ipc_router_xprt {
 		     struct msm_ipc_router_xprt *xprt);
 	int (*close)(struct msm_ipc_router_xprt *xprt);
 	void (*sft_close_done)(struct msm_ipc_router_xprt *xprt);
+	bool (*get_ws_info)(struct msm_ipc_router_xprt *xprt);
 };
 
 void msm_ipc_router_xprt_notify(struct msm_ipc_router_xprt *xprt,
