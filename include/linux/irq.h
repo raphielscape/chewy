@@ -181,6 +181,7 @@ struct irq_data {
  * IRQD_IRQ_MASKED		- Masked state of the interrupt
  * IRQD_IRQ_INPROGRESS		- In progress state of the interrupt
  * IRQD_WAKEUP_ARMED		- Wakeup mode armed
+ * IRQD_DEFAULT_TRIGGER_SET	- Expected trigger already been set
  */
 enum {
 	IRQD_TRIGGER_MASK		= 0xf,
@@ -195,6 +196,7 @@ enum {
 	IRQD_IRQ_MASKED			= (1 << 17),
 	IRQD_IRQ_INPROGRESS		= (1 << 18),
 	IRQD_WAKEUP_ARMED		= (1 << 19),
+	IRQD_DEFAULT_TRIGGER_SET	= (1 << 25),
 };
 
 static inline bool irqd_is_setaffinity_pending(struct irq_data *d)
@@ -222,18 +224,25 @@ static inline void irqd_mark_affinity_was_set(struct irq_data *d)
 	d->state_use_accessors |= IRQD_AFFINITY_SET;
 }
 
+static inline bool irqd_trigger_type_was_set(struct irq_data *d)
+{
+	return d->state_use_accessors & IRQD_DEFAULT_TRIGGER_SET;
+}
+
 static inline u32 irqd_get_trigger_type(struct irq_data *d)
 {
 	return d->state_use_accessors & IRQD_TRIGGER_MASK;
 }
 
 /*
- * Must only be called inside irq_chip.irq_set_type() functions.
+ * Must only be called inside irq_chip.irq_set_type() functions or
+ * from the DT/ACPI setup code.
  */
 static inline void irqd_set_trigger_type(struct irq_data *d, u32 type)
 {
 	d->state_use_accessors &= ~IRQD_TRIGGER_MASK;
 	d->state_use_accessors |= type & IRQD_TRIGGER_MASK;
+	d->state_use_accessors |= IRQD_DEFAULT_TRIGGER_SET;
 }
 
 static inline bool irqd_is_level_type(struct irq_data *d)
