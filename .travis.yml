@@ -1,0 +1,26 @@
+language: c
+
+os:
+  - linux
+
+before_install:
+  - sudo apt-get update -y
+  - sudo apt-get install libncurses5-dev
+  - sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 libgl1-mesa-dev g++-multilib tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386
+  - sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+  - sudo apt-get install -y ccache && echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc &&source ~/.bashrc && echo $PATH
+  - export USE_CCACHE=1
+
+before_script:
+# GCC7 prebuilts
+  - git clone https://github.com/nathanchance/gcc-prebuilts -b aarch64-gnu-7.x $HOME/GNU/GCC7
+
+# Kernel sauce
+  - git clone --depth=50 --branch=oreo https://github.com/alamo18/ChewyKernel $HOME/ChewyKernel
+
+script:
+  - export ARCH=arm64
+  - export KERNELDIR=${HOME}/ChewyKernel
+  - cd $HOME/ChewyKernel
+  - chmod a+x chewy/scripts/kernel.sh
+  - ./chewy/scripts/kernel.sh

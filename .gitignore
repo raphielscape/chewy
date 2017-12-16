@@ -57,6 +57,7 @@ Module.symvers
 #
 !.gitignore
 !.mailmap
+!.travis.yml
 
 #
 # Generated include files
@@ -100,4 +101,3 @@ out/*
 drivers/platform/msm/ipa/ipa_common
 
 # Misc
-
