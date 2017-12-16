@@ -79,9 +79,11 @@ echo -e "Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.";
 
 if [[ ! -f "${IMAGE}" ]]; then
     echo -e "Build failed :P";
+    success=false;
     exit 1;
 else
     echo -e "Build Succesful!";
+    success=true;
 fi
 
 echo -e "Copying kernel image";
@@ -94,10 +96,10 @@ cd -;
 if [ -f "$FINAL_ZIP" ];
 then
 echo -e "$ZIPNAME zip can be found at $FINAL_ZIP";
-if [[ "$@" =~ "transfer" ]]; then
+if [[ ${success} == true ]]; then
     echo -e "Uploading ${ZIPNAME} to https://transfer.sh/";
     transfer "${FINAL_ZIP}";
 fi
 else
 echo -e "Zip Creation Failed =(";
-fi # FINAL_ZIP check
+fi
