@@ -355,11 +355,7 @@ include $(srctree)/scripts/Kbuild.include
 # Make variables (CC, etc...)
 AS		= $(CROSS_COMPILE)as
 LD		= $(CROSS_COMPILE)ld
-<<<<<<< HEAD
 CC		= $(CCACHE) $(CROSS_COMPILE)gcc
-=======
-CC		= $(CROSS_COMPILE)gcc
->>>>>>> a0d0b1756da0... Nuke gcc-wrapper.py
 CPP		= $(CC) -E
 AR		= $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
