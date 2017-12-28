@@ -62,6 +62,11 @@
 
 static uint32_t lmk_count = 0;
 
+/* to enable lowmemorykiller */
+static int enable_lmk = 1;
+module_param_named(enable_lmk, enable_lmk, int,
+	S_IRUGO | S_IWUSR);
+
 static uint32_t lowmem_debug_level = 1;
 static short lowmem_adj[6] = {
 	0,
