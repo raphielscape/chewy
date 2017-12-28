@@ -20,11 +20,9 @@ struct homebutton_data {
 	bool scr_suspended;
 	bool enable;
 	int vib_strength;
-	unsigned int key;
 } hb_data = {
 	.vib_strength = VIB_STRENGTH,
-	.enable = true,
-	.key = KEY_HOME
+	.enable = true
 };
 
 static void hb_input_callback(struct work_struct *unused) {
@@ -34,7 +32,7 @@ static void hb_input_callback(struct work_struct *unused) {
 	if (hb_data.key_down)
 		set_vibrate(hb_data.vib_strength);
 
-	input_report_key(hb_data.hb_dev, hb_data.key, hb_data.key_down);
+	input_event(hb_data.hb_dev, EV_KEY, KEY_HOME, hb_data.key_down);
 	input_sync(hb_data.hb_dev);
 
 	mutex_unlock(&hb_lock);
@@ -206,31 +204,6 @@ static ssize_t vib_strength_store(struct device *dev,
 static DEVICE_ATTR(vib_strength, (S_IWUSR | S_IRUGO),
 	vib_strength_show, vib_strength_store);
 
-static ssize_t key_show(struct device *dev,
-		 struct device_attribute *attr, char *buf)
-{
-	return snprintf(buf, PAGE_SIZE, "%d\n", hb_data.key);
-}
-
-static ssize_t key_store(struct device *dev,
-		 struct device_attribute *attr, const char *buf, size_t count)
-{
-	int ret;
-	unsigned long input;
-
-	ret = kstrtoul(buf, 0, &input);
-	if (ret < 0)
-		return -EINVAL;
-
-	set_bit(input, hb_data.hb_dev->keybit);
-	hb_data.key = input;
-
-	return count;
-}
-
-static DEVICE_ATTR(key, (S_IWUSR | S_IRUGO),
-	key_show, key_store);
-
 static int __init hb_init(void)
 {
 	int rc = 0;
@@ -281,11 +254,7 @@ static int __init hb_init(void)
 
 	rc = sysfs_create_file(hb_data.homebutton_kobj, &dev_attr_vib_strength.attr);
 	if (rc)
-		pr_err("%s: sysfs_create_file failed for homebutton vib_strength\n", __func__);
-
-	rc = sysfs_create_file(hb_data.homebutton_kobj, &dev_attr_key.attr);
-	if (rc)
-		pr_err("%s: sysfs_create_file failed for homebutton key\n", __func__);
+		pr_err("%s: sysfs_create_file failed for homebutton vib_strength\n", __func__);		
 
 err_input_dev:
 	input_free_device(hb_data.hb_dev);
