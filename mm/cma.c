@@ -45,12 +45,12 @@ struct cma cma_areas[MAX_CMA_AREAS];
 unsigned cma_area_count;
 static DEFINE_MUTEX(cma_mutex);
 
-phys_addr_t cma_get_base(const struct cma *cma)
+phys_addr_t cma_get_base(struct cma *cma)
 {
 	return PFN_PHYS(cma->base_pfn);
 }
 
-unsigned long cma_get_size(const struct cma *cma)
+unsigned long cma_get_size(struct cma *cma)
 {
 	return cma->count << PAGE_SHIFT;
 }
