@@ -3,6 +3,9 @@
 source "chewy/scripts/env.sh";
 setperf
 
+# Update random backport
+source "scripts/random.sh";
+
 # Kernel compiling script
 
 function check_toolchain() {
