@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 source "chewy/scripts/env.sh";
-setperf
 
 # Update random backport
 source "scripts/random.sh";

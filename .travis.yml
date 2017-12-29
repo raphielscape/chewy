@@ -22,5 +22,4 @@ script:
   - export ARCH=arm64
   - export KERNELDIR=${HOME}/ChewyKernel
   - cd $HOME/ChewyKernel
-  - chmod a+x chewy/scripts/kernel.sh
   - ./chewy/scripts/kernel.sh
