@@ -39,6 +39,9 @@ int simple_gpu_algorithm(int level, int *val,
 	/* sync memory before sending the commands */
 	__iowmb();
 
+	/* sync memory before sending the commands */
+	__iowmb();
+
 	/* it's currently busy */
 	if (priv->bin.busy_time > ramp_up_threshold) {
 		if (level == 0) {
