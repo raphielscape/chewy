@@ -357,9 +357,9 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 		if (s->disabled || su->disable)
 			continue;
 		if (s->target_residency > data->predicted_us)
-			continue;
+			break;
 		if (s->exit_latency > latency_req)
-			continue;
+			break;
 
 		data->last_state_idx = i;
 	}
@@ -378,9 +378,9 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 static void menu_reflect(struct cpuidle_device *dev, int index)
 {
 	struct menu_device *data = this_cpu_ptr(&menu_devices);
-
 	data->last_state_idx = index;
-	data->needs_update = 1;
+	if (index >= 0)
+		data->needs_update = 1;
 }
 
 /**
@@ -401,8 +401,8 @@ static void menu_update(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	 * power state and occurrence of the wakeup event.
 	 *
 	 * If the entered idle state didn't support residency measurements,
-	 * we are basically lost in the dark how much time passed.
-	 * As a compromise, assume we slept for the whole expected time.
+	 * we use them anyway if they are short, and if long,
+	 * truncate to the whole expected time.
 	 *
 	 * Any measured amount of time will include the exit latency.
 	 * Since we are interested in when the wakeup begun, not when it
@@ -410,22 +410,19 @@ static void menu_update(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	 * the measured amount of time is less than the exit latency,
 	 * assume the state was never reached and the exit latency is 0.
 	 */
-	if (unlikely(!(target->flags & CPUIDLE_FLAG_TIME_VALID))) {
-		/* Use timer value as is */
+	
+	/* measured value */
+	measured_us = cpuidle_get_last_residency(dev);
+
+	/* Deduct exit latency */
+	if (measured_us > 2 * target->exit_latency)
+  			measured_us -= target->exit_latency;
+		else
+			measured_us /= 2;
+
+	/* Make sure our coefficients do not exceed unity */
+	if (measured_us > data->next_timer_us)
 		measured_us = data->next_timer_us;
-
-	} else {
-		/* Use measured value */
-		measured_us = cpuidle_get_last_residency(dev);
-
-		/* Deduct exit latency */
-		if (measured_us > target->exit_latency)
-			measured_us -= target->exit_latency;
-
-		/* Make sure our coefficients do not exceed unity */
-		if (measured_us > data->next_timer_us)
-			measured_us = data->next_timer_us;
-	}
 
 	/* Update our correction ratio */
 	new_factor = data->correction_factor[data->bucket];
