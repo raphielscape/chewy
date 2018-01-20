@@ -42,8 +42,9 @@
 /*
  * Enable/disable zcache (disabled by default)
  */
-static bool zcache_enabled __read_mostly;
-module_param_named(enabled, zcache_enabled, bool, 0);
+#define ENABLED '1'
+static bool zcache_enabled = ENABLED;
+module_param_named(enabled, zcache_enabled, bool, 0644);
 
 /*
  * Compressor to be used by zcache
