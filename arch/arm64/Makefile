@@ -20,7 +20,7 @@ KBUILD_DEFCONFIG := defconfig
 KBUILD_CFLAGS	+= -mgeneral-regs-only
 KBUILD_CFLAGS	+= -fno-pic
 KBUILD_CFLAGS	+= $(call cc-option, -mpc-relative-literal-loads)
-KBUILD_CFLAGS	+= -O3 -fno-tree-loop-if-convert -fno-split-wide-types -fno-tree-cselim -fno-ipa-pure-const -fno-tree-slp-vectorize -fno-tree-dse -fno-tree-loop-im -fno-merge-constants -fno-common -fconserve-stack -fno-caller-saves -fno-tree-tail-merge -fno-inline-functions-called-once -funroll-loops -fgcse-las -fno-cse-follow-jumps -fno-sched-dep-count-heuristic -fno-tree-phiprop -fno-tree-slsr -funroll-all-loops -fno-tree-loop-distribute-patterns -fno-tree-coalesce-vars -fno-reorder-functions -fno-peephole2 -fno-sched-last-insn-heuristic -fno-ipa-sra -fsched-spec-load -fgraphite-identity -floop-interchange -floop-strip-mine -floop-block -floop-parallelize-all
+KBUILD_CFLAGS	+= -O3 -fno-tree-loop-if-convert -fno-split-wide-types -fno-tree-cselim -fno-ipa-pure-const -fno-tree-slp-vectorize -fno-tree-dse -fno-tree-loop-im -fno-merge-constants -fno-common -fconserve-stack -fno-caller-saves -fno-tree-tail-merge -fno-inline-functions-called-once -funroll-loops -fgcse-las -fno-cse-follow-jumps -fno-sched-dep-count-heuristic -fno-tree-phiprop -fno-tree-slsr -funroll-all-loops -fno-tree-loop-distribute-patterns -fno-tree-coalesce-vars -fno-reorder-functions -fno-peephole2 -fno-sched-last-insn-heuristic -fno-ipa-sra -fsched-spec-load -floop-interchange -floop-strip-mine -floop-block -floop-parallelize-all
 KBUILD_CFLAGS	+= $(call cc-ifversion, -ge, 0500, -DCONFIG_ARCH_SUPPORTS_INT128)
 
 ifeq ($(CONFIG_CPU_BIG_ENDIAN), y)

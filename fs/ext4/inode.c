@@ -5128,7 +5128,6 @@ int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 void ext4_dirty_inode(struct inode *inode, int flags)
 {
 	handle_t *handle;
-
 	if (flags == I_DIRTY_TIME)
 		return;
 	handle = ext4_journal_start(inode, EXT4_HT_INODE, 2);
