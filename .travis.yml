@@ -16,10 +16,10 @@ before_install:
 
 before_script:
 # GCC7 prebuilts
-  - git clone https://github.com/raphielscape/gcc8-memes-precompiled.git $HOME/GNU/GCC7
+  - git clone --depth=1 https://github.com/raphielscape/gcc8-memes-precompiled.git $HOME/GNU/GCC7
 
 # Kernel sauce
-  - git clone --depth=50 --branch=oreo https://github.com/alamo18/ChewyKernel $HOME/ChewyKernel
+  - git clone --depth=1 --branch=oreo https://github.com/raphielscape/chewy.git $HOME/ChewyKernel
 
 script:
   - export ARCH=arm64
