@@ -1,5 +1,8 @@
 language: c
 
+notifications:
+  webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
+
 os:
   - linux
 
@@ -13,7 +16,7 @@ before_install:
 
 before_script:
 # GCC7 prebuilts
-  - git clone https://github.com/nathanchance/gcc-prebuilts -b aarch64-gnu-7.x $HOME/GNU/GCC7
+  - git clone https://github.com/raphielscape/gcc8-memes-precompiled.git $HOME/GNU/GCC7
 
 # Kernel sauce
   - git clone --depth=50 --branch=oreo https://github.com/alamo18/ChewyKernel $HOME/ChewyKernel
