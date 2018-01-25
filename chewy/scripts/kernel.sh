@@ -36,10 +36,10 @@ export OUTDIR="${KERNELDIR}/out";
 export ANYKERNEL="${KERNELDIR}/chewy/anykernel/";
 export ARCH="arm64";
 export SUBARCH="arm64";
-export KBUILD_BUILD_USER="alamo"
-export KBUILD_BUILD_HOST="fluffycloud"
+export KBUILD_BUILD_USER="raphielscape"
+export KBUILD_BUILD_HOST="travisbox"
 export TOOLCHAIN="${HOME}/GNU/GCC7/";
-export DEFCONFIG="chewy_defconfig";
+export DEFCONFIG="raphiel_defconfig";
 export ZIP_DIR="${KERNELDIR}/chewy/files/";
 export IMAGE="${OUTDIR}/arch/${ARCH}/boot/Image.gz-dtb";
 
