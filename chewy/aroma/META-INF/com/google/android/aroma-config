@@ -1,0 +1,179 @@
+﻿### LICENSE:
+#
+# Copyright (C) 2011 Ahmad Amarullah ( http://amarullz.com/ )
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+###
+
+ini_set("force_colorspace","rgba");
+ini_set("dp","4");
+
+anisplash(
+    1,
+    "anim/zpx", 2000
+);
+
+fontresload( "0", "ttf/droid.ttf", "15" );
+fontresload( "1", "ttf/droid.ttf", "20" ); 
+
+theme("zetsubou");
+
+agreebox(
+   "\nTerms Of Use",
+   "<@center><b>\nPlease read the terms of use</b>\n\n</@>",
+   "",
+   "" + readfile_aroma("agreement.txt"),
+   "I agree with these terms of use",
+   "<@center>\nYou must accept the terms</@>"
+
+);
+
+alert(
+  "NOTICE:",
+  "<b>Do not flash this over other custom kernels.</b>Please ensure that you have either a previous version of Blyat or the kernel that came with your ROM installed.\n\nThis kernel will allow you to choose hardware settings that may not work with your device.\n\n",
+  "@warning",
+  "OK"
+);
+
+menubox(
+  "\nInferno Installer",
+  "<@center><b>\nReady to install</b>\n\n</@>",
+  "",
+  "menu.prop",
+  "Install","one-tap setup with recommended settings ","@install",
+  "Customize installation","select your custom settings","@custom",
+  "Changelog","view the complete changelog of this release","@changelog",
+  "Exit","exit to recovery","@trash"
+);
+
+if prop("menu.prop", "selected")=="3" then
+textbox(
+   "\nChangelog",
+   "<@center><b>\nChangelog up to current version</b>\n\n</@>",
+   "",
+   resread("changelog.txt")
+);
+back("2");
+endif;
+
+if prop("menu.prop", "selected")=="4" then
+  if
+    confirm(
+      "Exit",
+      "Are you sure want to exit the Installer?",
+      "@warning"
+    )=="yes"
+  then
+    exit("");
+  endif;
+  back("1");
+endif;
+
+if prop("menu.prop", "selected")=="2" then
+alert(
+  "WARNING:",
+  "<b>Warning!</b> The options for setting manually custom ramdisk, if your not understand to setting manually just use automatic (one-tap install). \n\n@raphielscape: LOL JUST DO THIS BLYAT LMAO\n\n",
+  "@dragon",
+  "OK"
+);
+
+selectbox(
+  "\nCPU Settings","<@center><b>\nConfigure frequencies\n</b></@>","","cpu0.prop",
+  "Minimum CPU Frequency", "", 2,
+  "650MHz","",1,
+  "1,0GHz","",0,
+  "1,4GHz","",0,
+  "Maximum CPU Frequency", "", 2,
+  "2.0GHz","",0,
+  "1,9GHz","",1,
+  "1,8GHz","",0,
+  "1,6GHz","",0
+);
+
+selectbox(
+  "\nCPU Governor","<@center><b>\nSelect the governor you would like to use for your CPU</b>\n\n</@>","","gov.prop",
+  "conservative","",0,
+  "interactive","(recommended)",1,
+  "ondemand","",0,
+  "performance","",0
+);
+
+selectbox(
+  "\nI/O Schedulers","<@center><b>\nSelect the I/O scheduler you would like to use</b>\n\n</@>","","sched.prop",
+  "Select I/O Scheduler","",2,
+  "cfq","",0,
+  "deadline","",0,
+  "maple","",0,
+  "noop","",0,
+  "zen","",0,
+  "iops","",0,
+  "siops","",0,
+  "bfq","(recommended)",1,  
+  "Select readahead buffer size","",2,
+  "768","",0,
+  "1024","",0,
+  "2048","(recommended)",1
+);
+
+selectbox(
+  "\nMiscellaneous","","","misc.prop",
+  "KCAL advanced color control","",2,
+  "Stock","",1,
+  "Gerrard Extreme Cool","",0,
+  "Purian","",0,
+  "Franco","",0,
+  "Deep Black Colorful","",0,
+  "WrinkleeFree Cool","",0,
+  "Custom vibrator intensity","",2,
+  "30%","",0,
+  "50","",1,
+  "80%","",0,
+  "Custom Patch ZRAM","",2,
+  "786MB","",0,
+  "1GB","",1,
+  "1,5GB","",0
+);
+
+ini_set("text_next", "Install");
+textbox(
+  "\nInstallation",
+  "<@center><b>\nAre you ready to install Raphielscape based on your preferences?</b>\n\n</@>",
+  "",
+  "\nPress <b>Install</b> to perform the install.\n\n" +
+  "If you want to review or change any of your settings, press <b>Back</b>."
+);
+
+endif;
+
+ini_set("text_next", "Next");
+
+setvar("retstatus",
+install(
+  "\nInstalling",
+  "<@center>\nInstalling Raphielscape Kernel...\nPlease wait...</@>",
+  "")
+);
+
+ini_set("text_next", "Finish");
+
+if getvar("retstatus")=="0" then
+  viewbox(
+  "\nInstallation Completed",
+  "<@center>\nCongratulations!\n"+
+  "IT'S SUCCESS ALREADY BLYAT RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n\n\n</@>",
+  ""
+);
+else
+   viewbox("Installation Failed","\n\nInstaller Status: "+ getvar("retstatus"),"@warning");
+endif;
