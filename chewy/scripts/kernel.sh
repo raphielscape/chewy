@@ -33,7 +33,8 @@ fi
 
 export SRCDIR="${KERNELDIR}/${DEVICE}";
 export OUTDIR="${KERNELDIR}/out";
-export ANYKERNEL="${KERNELDIR}/chewy/anykernel/";
+export ANYKERNEL="${KERNELDIR}/chewy/aroma/anykernel/";
+export AROMA="${KERNELDIR}/chewy/aroma/";
 export ARCH="arm64";
 export SUBARCH="arm64";
 export KBUILD_BUILD_USER="raphielscape"
@@ -44,8 +45,7 @@ export ZIP_DIR="${KERNELDIR}/chewy/files/";
 export IMAGE="${OUTDIR}/arch/${ARCH}/boot/Image.gz-dtb";
 
 if [[ -z "${JOBS}" ]]; then
-#    export JOBS="$(grep -c '^processor' /proc/cpuinfo)";
-    export JOBS=8;
+    export JOBS="$(grep -c '^processor' /proc/cpuinfo)";
 fi
 
 export MAKE="make O=${OUTDIR}";
@@ -94,7 +94,7 @@ fi
 echo -e "Copying kernel image";
 cp -v "${IMAGE}" "${ANYKERNEL}/";
 cd -;
-cd ${ANYKERNEL};
+cd ${AROMA};
 zip -r9 ${FINAL_ZIP} *;
 cd -;
 
