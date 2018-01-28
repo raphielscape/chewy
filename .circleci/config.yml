@@ -1,0 +1,27 @@
+version: 2
+jobs:
+  one:
+    docker:
+      - image: debian:stretch
+    steps:
+      - checkout
+      - run:
+        - sudo apt-get update -y
+        - sudo apt-get install libncurses5-dev
+        - sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 libgl1-mesa-dev g++-multilib tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386
+        - sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+        - sudo apt-get install -y ccache && echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc &&source ~/.bashrc && echo $PATH
+        - export USE_CCACHE=1
+  two:
+    docker:
+      - image: debian:stretch
+    steps:
+      # GCC7 prebuilts
+      - git clone --depth=1 https://github.com/raphielscape/gcc8-memes-precompiled.git $HOME/GNU/GCC7
+      # Kernel sauce
+      - git clone --depth=1 --branch=oreo https://github.com/raphielscape/chewy.git $HOME/ChewyKernel
+      # Here we go
+      - export ARCH=arm64
+      - export KERNELDIR=${HOME}/ChewyKernel
+      - cd $HOME/ChewyKernel
+      - ./chewy/scripts/kernel.sh
