@@ -5,7 +5,8 @@ notifications:
 
 os:
   - linux
-dist: xenial
+sudo: required
+dist: trusty
 
 before_install:
   - sudo apt-get update -y
