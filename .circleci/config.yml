@@ -5,24 +5,22 @@ jobs:
       - image: debian:stretch
     steps:
       - checkout
-      - run:
-        - sudo apt-get update -y
-        - sudo apt-get install libncurses5-dev
-        - sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 libgl1-mesa-dev g++-multilib tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386
-        - sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
-        - sudo apt-get install -y ccache && echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc &&source ~/.bashrc && echo $PATH
-        - export USE_CCACHE=1
+      - run: sudo apt-get update -y
+      - run: sudo apt-get install libncurses5-dev
+      - run: sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 libgl1-mesa-dev g++-multilib tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386
+      - run: sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+      - run: sudo apt-get install -y ccache && echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc &&source ~/.bashrc && echo $PATH
+      - run: export USE_CCACHE=1
   build:
     docker:
       - image: debian:stretch
     steps:
-      - run:
       # GCC7 prebuilts
-      - git clone --depth=1 https://github.com/raphielscape/gcc8-memes-precompiled.git $HOME/GNU/GCC7
+      - run: git clone --depth=1 https://github.com/raphielscape/gcc8-memes-precompiled.git $HOME/GNU/GCC7
       # Kernel sauce
-      - git clone --depth=1 --branch=oreo https://github.com/raphielscape/chewy.git $HOME/ChewyKernel
+      - run: git clone --depth=1 --branch=oreo https://github.com/raphielscape/chewy.git $HOME/ChewyKernel
       # Here we go
-      - export ARCH=arm64
-      - export KERNELDIR=${HOME}/ChewyKernel
-      - cd $HOME/ChewyKernel
-      - ./chewy/scripts/kernel.sh
+      - run: export ARCH=arm64
+      - run: export KERNELDIR=${HOME}/ChewyKernel
+      - run: cd $HOME/ChewyKernel
+      - run: ./chewy/scripts/kernel.sh
