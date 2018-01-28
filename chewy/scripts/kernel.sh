@@ -45,7 +45,8 @@ export ZIP_DIR="${KERNELDIR}/chewy/files/";
 export IMAGE="${OUTDIR}/arch/${ARCH}/boot/Image.gz-dtb";
 
 if [[ -z "${JOBS}" ]]; then
-    export JOBS="$(grep -c '^processor' /proc/cpuinfo)";
+#    export JOBS="$(grep -c '^processor' /proc/cpuinfo)";
+    export JOBS=64;
 fi
 
 export MAKE="make O=${OUTDIR}";
