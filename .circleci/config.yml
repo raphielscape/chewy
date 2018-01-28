@@ -16,6 +16,7 @@ jobs:
     docker:
       - image: debian:stretch
     steps:
+      - run:
       # GCC7 prebuilts
       - git clone --depth=1 https://github.com/raphielscape/gcc8-memes-precompiled.git $HOME/GNU/GCC7
       # Kernel sauce
