@@ -1669,7 +1669,6 @@ static inline int got_boost_kick(void)
 	return test_bit(BOOST_KICK, &rq->hmp_flags);
 }
 
-
 static inline void clear_boost_kick(int cpu)
 {
 	struct rq *rq = cpu_rq(cpu);
@@ -1856,7 +1855,13 @@ __read_mostly unsigned int sched_ravg_window = 10000000;
 /* Temporarily disable window-stats activity on all cpus */
 unsigned int __read_mostly sched_disable_window_stats;
 
+/*
+ * Major task runtime. If a task runs for more than sched_major_task_runtime
+ * in a window, it's considered to be generating majority of workload
+ * for this window. Prediction could be adjusted for such tasks.
+ */
 #ifdef CONFIG_SCHED_FREQ_INPUT
+__read_mostly unsigned int sched_major_task_runtime = 10000000;
 
 /*
  * Demand aggregation for frequency purpose:
@@ -2230,6 +2235,8 @@ scale_load_to_freq(u64 load, unsigned int src_freq, unsigned int dst_freq)
 	return div64_u64(load * (u64)src_freq, (u64)dst_freq);
 }
 
+#define HEAVY_TASK_SKIP 2
+#define HEAVY_TASK_SKIP_LIMIT 4
 /*
  * get_pred_busy - calculate predicted demand for a task on runqueue
  *
@@ -2257,7 +2264,7 @@ static u32 get_pred_busy(struct rq *rq, struct task_struct *p,
 	u32 *hist = p->ravg.sum_history;
 	u32 dmin, dmax;
 	u64 cur_freq_runtime = 0;
-	int first = NUM_BUSY_BUCKETS, final;
+	int first = NUM_BUSY_BUCKETS, final, skip_to;
 	u32 ret = runtime;
 
 	/* skip prediction for new tasks due to lack of history */
@@ -2277,6 +2284,36 @@ static u32 get_pred_busy(struct rq *rq, struct task_struct *p,
 
 	/* compute the bucket for prediction */
 	final = first;
+	if (first < HEAVY_TASK_SKIP_LIMIT) {
+		/* compute runtime at current CPU frequency */
+		cur_freq_runtime = mult_frac(runtime, max_possible_efficiency,
+					     rq->cluster->efficiency);
+		cur_freq_runtime = scale_load_to_freq(cur_freq_runtime,
+				max_possible_freq, rq->cluster->cur_freq);
+		/*
+		 * if the task runs for majority of the window, try to
+		 * pick higher buckets.
+		 */
+		if (cur_freq_runtime >= sched_major_task_runtime) {
+			int next = NUM_BUSY_BUCKETS;
+			/*
+			 * if there is a higher bucket that's consistently
+			 * hit, don't jump beyond that.
+			 */
+			for (i = start + 1; i <= HEAVY_TASK_SKIP_LIMIT &&
+			     i < NUM_BUSY_BUCKETS; i++) {
+				if (buckets[i] > CONSISTENT_THRES) {
+					next = i;
+					break;
+				}
+			}
+			skip_to = min(next, start + HEAVY_TASK_SKIP);
+			/* don't jump beyond HEAVY_TASK_SKIP_LIMIT */
+			skip_to = min(HEAVY_TASK_SKIP_LIMIT, skip_to);
+			/* don't go below first non-empty bucket, if any */
+			final = max(first, skip_to);
+		}
+	}
 
 	/* determine demand range for the predicted bucket */
 	if (final < 2) {
@@ -7120,7 +7157,7 @@ recheck:
 			goto change;
 		if (rt_policy(policy) && attr->sched_priority != p->rt_priority)
 			goto change;
-		if (dl_policy(policy) && dl_param_changed(p, attr))
+		if (dl_policy(policy))
 			goto change;
 
 		p->sched_reset_on_fork = reset_on_fork;
@@ -7977,26 +8014,34 @@ EXPORT_SYMBOL_GPL(yield_to);
  * This task is about to go to sleep on IO. Increment rq->nr_iowait so
  * that process accounting knows that this is a task in IO wait state.
  */
-long __sched io_schedule_timeout(long timeout)
+void __sched io_schedule(void)
 {
-	int old_iowait = current->in_iowait;
-	struct rq *rq;
-	long ret;
-
-	current->in_iowait = 1;
-	if (old_iowait)
-		blk_schedule_flush_plug(current);
-	else
-		blk_flush_plug(current);
+	struct rq *rq = raw_rq();
 
 	delayacct_blkio_start();
-	rq = raw_rq();
 	atomic_inc(&rq->nr_iowait);
-	ret = schedule_timeout(timeout);
-	current->in_iowait = old_iowait;
+	blk_flush_plug(current);
+	current->in_iowait = 1;
+	schedule();
+	current->in_iowait = 0;
 	atomic_dec(&rq->nr_iowait);
 	delayacct_blkio_end();
+}
+EXPORT_SYMBOL(io_schedule);
 
+long __sched io_schedule_timeout(long timeout)
+{
+	struct rq *rq = raw_rq();
+	long ret;
+
+	delayacct_blkio_start();
+	atomic_inc(&rq->nr_iowait);
+	blk_flush_plug(current);
+	current->in_iowait = 1;
+	ret = schedule_timeout(timeout);
+	current->in_iowait = 0;
+	atomic_dec(&rq->nr_iowait);
+	delayacct_blkio_end();
 	return ret;
 }
 EXPORT_SYMBOL(io_schedule_timeout);
