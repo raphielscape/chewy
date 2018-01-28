@@ -25,3 +25,9 @@ jobs:
       - export KERNELDIR=${HOME}/ChewyKernel
       - cd $HOME/ChewyKernel
       - ./chewy/scripts/kernel.sh
+workflows:
+  version: 2
+  one_and_two:
+    jobs:
+      - one
+      - two
