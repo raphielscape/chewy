@@ -10,7 +10,7 @@
 /*
 • Prefer to schedule the task we woke last (assuming it failed
 • wakeup-preemption), since its likely going to consume data we
-• touched, increases cache locality. */ SCHED_FEAT(NEXT_BUDDY, true
+• touched, increases cache locality. */ SCHED_FEAT(NEXT_BUDDY, true)
 
 /*
 • Prefer to schedule the task that ran last (when we did
@@ -38,9 +38,10 @@ SCHED_FEAT(HRTICK, false) SCHED_FEAT(DOUBLE_TICK, false) SCHED_FEAT(LB_BIAS, tru
 
 /*
 • Queue remote wakeups on the target CPU and process them
-• using the scheduler IPI. Reduces rq->lock contention/bounces. */ SCHED_FEAT(TTWU_QUEUE, true
+• using the scheduler IPI. Reduces rq->lock contention/bounces. */ SCHED_FEAT(TTWU_QUEUE, true)
 
-SCHED_FEAT(FORCE_SD_OVERLAP, false) SCHED_FEAT(RT_RUNTIME_SHARE, true) SCHED_FEAT(LB_MIN, false)
+SCHED_FEAT(FORCE_SD_OVERLAP, false) SCHED_FEAT(RT_RUNTIME_SHARE, true)
+SCHED_FEAT(LB_MIN, false)
 
 /*
 • Apply the automatic NUMA scheduling policy. Enabled automatically
