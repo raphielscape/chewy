@@ -4275,6 +4275,7 @@ CONFIG_MSM_TZ_LOG=y
 #
 # Firmware Drivers
 #
+# CONFIG_FW_CACHE is not set
 
 #
 # EFI (Extensible Firmware Interface) Support
