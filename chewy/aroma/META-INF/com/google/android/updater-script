@@ -36,7 +36,7 @@ package_extract_file("config/buildconfig.sh", "/tmp/buildconfig.sh");
 package_extract_file("config/buildcustomconfig.sh", "/tmp/buildcustomconfig.sh");
 set_perm(0, 0, 0777, "/tmp/buildconfig.sh");
 set_perm(0, 0, 0777, "/tmp/buildcustomconfig.sh");
-set_perm(0, 0, 0644, "/system/vendor/bin/init.qcom.post_boot.sh");
+set_perm(0, 0, 0777, "/system/vendor/bin/init.qcom.post_boot.sh");
 
 set_progress(0.6);
 ui_print("Running Setup Smash...");
