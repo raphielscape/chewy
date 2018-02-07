@@ -20,7 +20,7 @@ KBUILD_DEFCONFIG := defconfig
 KBUILD_CFLAGS	+= -mgeneral-regs-only
 KBUILD_CFLAGS	+= -fno-pic
 KBUILD_CFLAGS	+= $(call cc-option, -mpc-relative-literal-loads)
-KBUILD_CFLAGS	+= -O3 -fno-tree-loop-if-convert -fno-split-wide-types -fno-tree-cselim -fno-ipa-pure-const -fno-tree-slp-vectorize -fno-tree-dse -fno-tree-loop-im -fno-merge-constants -fno-common -fconserve-stack -fno-caller-saves -fno-tree-tail-merge -fno-inline-functions-called-once -funroll-loops -fgcse-las -fno-cse-follow-jumps -fno-sched-dep-count-heuristic -fno-tree-phiprop -fno-tree-slsr -funroll-all-loops -fno-tree-loop-distribute-patterns -fno-tree-coalesce-vars -fno-reorder-functions -fno-peephole2 -fno-sched-last-insn-heuristic -fno-ipa-sra -fsched-spec-load
+KBUILD_CFLAGS	+= -fno-tree-loop-if-convert -fno-split-wide-types -fno-tree-cselim -fno-ipa-pure-const -fno-tree-slp-vectorize -fno-tree-dse -fno-tree-loop-im -fno-merge-constants -fno-common -fconserve-stack -fno-caller-saves -fno-tree-tail-merge -fno-inline-functions-called-once -funroll-loops -fgcse-las -fno-cse-follow-jumps -fno-sched-dep-count-heuristic -fno-tree-phiprop -fno-tree-slsr -funroll-all-loops -fno-tree-loop-distribute-patterns -fno-tree-coalesce-vars -fno-reorder-functions -fno-peephole2 -fno-sched-last-insn-heuristic -fno-ipa-sra -fsched-spec-load
 KBUILD_CFLAGS	+= $(call cc-ifversion, -ge, 0500, -DCONFIG_ARCH_SUPPORTS_INT128)
 
 ifeq ($(CONFIG_CPU_BIG_ENDIAN), y)
@@ -34,19 +34,19 @@ LD		+= -EL
 endif
 
 # Cortex-A53 optimizations
-arch-$(CONFIG_ARCH_MSM8916)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto,-march=armv8-a+crc+crypto)
+arch-$(CONFIG_ARCH_MSM8916)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto+sve,-march=armv8-a+crc+crypto+sve)
 tune-$(CONFIG_ARCH_MSM8916)	:= -mtune=cortex-a53
-arch-$(CONFIG_ARCH_MSM8917)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto,-march=armv8-a+crc+crypto)
+arch-$(CONFIG_ARCH_MSM8917)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto+sve,-march=armv8-a+crc+crypto+sve)
 tune-$(CONFIG_ARCH_MSM8917)	:= -mtune=cortex-a53
-arch-$(CONFIG_ARCH_MSM8920)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto,-march=armv8-a+crc+crypto)
+arch-$(CONFIG_ARCH_MSM8920)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto+sve,-march=armv8-a+crc+crypto+sve)
 tune-$(CONFIG_ARCH_MSM8920)	:= -mtune=cortex-a53
-arch-$(CONFIG_ARCH_MSM8937)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto,-march=armv8-a+crc+crypto)
+arch-$(CONFIG_ARCH_MSM8937)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto+sve,-march=armv8-a+crc+crypto+sve)
 tune-$(CONFIG_ARCH_MSM8937)	:= -mtune=cortex-a53
-arch-$(CONFIG_ARCH_MSM8940)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto,-march=armv8-a+crc+crypto)
+arch-$(CONFIG_ARCH_MSM8940)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto+sve,-march=armv8-a+crc+crypto+sve)
 tune-$(CONFIG_ARCH_MSM8940)	:= -mtune=cortex-a53
-arch-$(CONFIG_ARCH_MSM8953)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto,-march=armv8-a+crc+crypto)
+arch-$(CONFIG_ARCH_MSM8953)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto+sve,-march=armv8-a+crc+crypto+sve)
 tune-$(CONFIG_ARCH_MSM8953)	:= -mtune=cortex-a53
-arch-$(CONFIG_ARCH_SDM450)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto,-march=armv8-a+crc+crypto)
+arch-$(CONFIG_ARCH_SDM450)	:= $(call cc-option,-mcpu=cortex-a53+crc+crypto+sve,-march=armv8-a+crc+crypto+sve)
 tune-$(CONFIG_ARCH_SDM450)	:= -mtune=cortex-a53
 
 KBUILD_CFLAGS	+= $(arch-y) $(tune-y)
