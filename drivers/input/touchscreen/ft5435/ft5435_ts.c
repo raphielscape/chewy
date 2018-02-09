@@ -1453,8 +1453,6 @@ static int ft5435_ts_suspend(struct device *dev)
 		return 0;
 	}
 
-	disable_irq(data->client->irq);
-
 	/* release all touches */
 	for (i = 0; i < data->pdata->num_max_touches; i++) {
 		input_mt_slot(data->input_dev, i);
@@ -1466,12 +1464,15 @@ static int ft5435_ts_suspend(struct device *dev)
 #if defined(FOCALTECH_TP_GESTURE)
 	{
 		if (gesture_func_on) {
-			enable_irq(data->client->irq);
+			enable_irq_wake(data->client->irq);
 			ft_tp_suspend(data);
 			return 0;
 		}
 	}
 #endif
+
+	disable_irq(data->client->irq);
+
 	if (gpio_is_valid(data->pdata->reset_gpio)) {
 		gpio_set_value_cansleep(data->pdata->reset_gpio, 1);
 		msleep(300);
