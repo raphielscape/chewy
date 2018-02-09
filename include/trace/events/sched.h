@@ -767,9 +767,9 @@ TRACE_EVENT(sched_boost_cpu,
 TRACE_EVENT(sched_tune_tasks_update,
 
 	TP_PROTO(struct task_struct *tsk, int cpu, int tasks, int idx,
-		int boost, int max_boost),
+		int boost, int max_boost, ktime_t group_timeout),
 
-	TP_ARGS(tsk, cpu, tasks, idx, boost, max_boost),
+	TP_ARGS(tsk, cpu, tasks, idx, boost, max_boost, group_timeout),
 
 	TP_STRUCT__entry(
 		__array( char,	comm,	TASK_COMM_LEN	)
@@ -779,6 +779,7 @@ TRACE_EVENT(sched_tune_tasks_update,
 		__field( int,		idx		)
 		__field( int,		boost		)
 		__field( int,		max_boost	)
+		__field( s64,		group_timeout	)
 	),
 
 	TP_fast_assign(
@@ -789,13 +790,15 @@ TRACE_EVENT(sched_tune_tasks_update,
 		__entry->idx 		= idx;
 		__entry->boost		= boost;
 		__entry->max_boost	= max_boost;
+		__entry->group_timeout	= group_timeout.tv64;
 	),
 
 	TP_printk("pid=%d comm=%s "
-			"cpu=%d tasks=%d idx=%d boost=%d max_boost=%d",
+			"cpu=%d tasks=%d idx=%d boost=%d max_boost=%d timeout=%lld",
 		__entry->pid, __entry->comm,
 		__entry->cpu, __entry->tasks, __entry->idx,
-		__entry->boost, __entry->max_boost)
+		__entry->boost, __entry->max_boost,
+		__entry->group_timeout)
 );
 
 /*
