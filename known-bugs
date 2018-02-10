@@ -1,7 +1,9 @@
-1, Kernel build error when ARCH=arm with multi_v7_defconfig+CONFIG_SMP=n 
-	arch/arm/kernel/psci.c:287:115: error: redefinition of 'psci_init'
-  This bug start from commit dbcfee724255ae1 ARM: 8457/1: psci-smp is built only for SMP
-2, Kernel build error when ARCH=x86 with allmodconfig+CONFIG_OF=n or defconfig+CONFIG_KASAN=y
-	include/linux/kasan.h:21:14: error: conflicting types for 'kasan_zero_pud'
-	include/linux/kasan.h:20:14: error: conflicting types for 'kasan_zero_pmd'
-  This bug is due to KASAN feature backporting
+1. Working around some things that caused ipa_rmnet stalling, Suspecting HRTICK
+   and LM_MIN, working around later
+2. Sand memes
+3. Updating documentations for my own use
+4. Tuning Frequencies
+5. Moar gaming ffs
+6. Making sure the source doesn't too much messed up, especially that ipa_rmnet
+   Revert everything that suspected causing data stalling to prevent any defeats
+   on my Mobile Legends gameplay
