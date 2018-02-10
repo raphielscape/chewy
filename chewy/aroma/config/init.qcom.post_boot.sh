@@ -87,6 +87,9 @@
 
   # Enable low power modes
   echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+  
+  # Drop Cache things, well, kswapd dirty workaround though
+  echo 3 > /proc/sys/vm/drop_caches
 
   # SMP scheduler
   echo 85 > /proc/sys/kernel/sched_upmigrate
@@ -110,7 +113,6 @@
   
   # Default Slowdowns on KSM
   echo 1 > /sys/kernel/mm/ksm/deferred_timer
-  echo 3000 > /sys/kernel/mm/ksm/sleep_milisecs
   echo 1024 > /sys/kernel/mm/ksm/pages_to_scan
 
   # Set Memory paremeters.
