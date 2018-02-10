@@ -9,10 +9,7 @@ on init
    write /proc/sys/kernel/sched_boost 1
    
 on property:sys.boot_completed=1
-   # run init_usertweaks
-   start usertweaks
-
-   # swaptuning
+   start majordomo
    write /sys/block/zram0/comp_algorithm lz4
    write /proc/sys/vm/swappiness 1
    write /proc/sys/vm/dirty_background_ratio 25
@@ -24,10 +21,8 @@ on property:sys.boot_completed=1
    write /sys/kernel/mm/ksm/sleep_milisecs 3000
 
 on charger
-   # downscaling swap when charging
    write /proc/sys/vm/dirty_background_ratio 5
    write /proc/sys/vm/dirty_ratio 35
    write /proc/sys/vm/dirty_writeback_centisecs 300
    write /proc/sys/vm/dirty_expire_centisecs 175
-   write /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_rate 20000
    write /sys/kernel/mm/ksm/sleep_milisecs 1500
