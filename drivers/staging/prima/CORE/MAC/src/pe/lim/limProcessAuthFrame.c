@@ -287,7 +287,8 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
             goto free;
         }
 
-        if (frameLen < LIM_ENCR_AUTH_BODY_LEN_SAP)
+        if ((frameLen < LIM_ENCR_AUTH_BODY_LEN_SAP) ||
+            (frameLen > LIM_ENCR_AUTH_BODY_LEN))
         {
             // Log error
             limLog(pMac, LOGE,
@@ -1857,6 +1858,16 @@ tSirRetStatus limProcessAuthFrameNoSession(tpAniSirGlobal pMac, tANI_U8 *pBd, vo
     pBody = WDA_GET_RX_MPDU_DATA(pBd);
     frameLen = WDA_GET_RX_PAYLOAD_LEN(pBd);
 
+    /*
+     * since, roaming is not supported in sta + mon scc, ignore
+     * pre-auth when capture on monitor mode is started
+     */
+    if (vos_check_monitor_state())
+    {
+        limLog(pMac, LOG1, FL("Ignore pre-auth frame in monitor mode"));
+        return eSIR_FAILURE;
+    }
+
     limLog(pMac, LOG1, FL("Auth Frame Received: BSSID " MAC_ADDRESS_STR
     " (RSSI %d)"),MAC_ADDR_ARRAY(pHdr->bssId),
     (uint)abs((tANI_S8)WDA_GET_RX_RSSI_DB(pBd)));
@@ -1921,14 +1932,14 @@ tSirRetStatus limProcessAuthFrameNoSession(tpAniSirGlobal pMac, tANI_U8 *pBd, vo
          * pre-auth.
          */
         PELOGE(limLog(pMac,LOG1,"Auth rsp already posted to SME"
-               " (session %p, FT session %p)", psessionEntry,
+               " (session %pK, FT session %pK)", psessionEntry,
                pMac->ft.ftPEContext.pftSessionEntry););
         return eSIR_SUCCESS;
     }
     else
     {
         PELOGE(limLog(pMac,LOGW,"Auth rsp not yet posted to SME"
-               " (session %p, FT session %p)", psessionEntry,
+               " (session %pK, FT session %pK)", psessionEntry,
                pMac->ft.ftPEContext.pftSessionEntry););
         pMac->ft.ftPEContext.pFTPreAuthReq->bPreAuthRspProcessed =
             eANI_BOOLEAN_TRUE;

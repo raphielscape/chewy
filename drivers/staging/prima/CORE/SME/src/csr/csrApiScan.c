@@ -479,7 +479,7 @@ eHalStatus csrQueueScanRequest( tpAniSirGlobal pMac, tSmeCmd *pScanCmd )
             pChnInfo->numOfChannels = pScanCmd->u.scanCmd.u.scanRequest.ChannelInfo.numOfChannels - nNumChanCombinedConc;
 
             VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_WARN,
-                    FL(" &channelToScan %p pScanCmd(%p) pScanCmd->u.scanCmd.u.scanRequest.ChannelInfo.ChannelList(%p)numChn(%d)"),
+                    FL(" &channelToScan %pK pScanCmd(%pK) pScanCmd->u.scanCmd.u.scanRequest.ChannelInfo.ChannelList(%pK)numChn(%d)"),
                     &channelToScan[0], pScanCmd,
                     pScanCmd->u.scanCmd.u.scanRequest.ChannelInfo.ChannelList, numChn);
 
@@ -5732,10 +5732,11 @@ static tANI_BOOLEAN csrScanProcessScanResults( tpAniSirGlobal pMac, tSmeCmd *pCo
      */
     if (pMac->scan.defer_update_channel_list) {
         status = csrUpdateChannelList(pMac);
-        if (eHAL_STATUS_SUCCESS != status)
+        if (eHAL_STATUS_SUCCESS != status) {
             smsLog(pMac, LOGE,
                    FL( "failed to update the supported channel list"));
             pMac->scan.defer_update_channel_list = false;
+        }
     }
 
 #ifdef WLAN_AP_STA_CONCURRENCY

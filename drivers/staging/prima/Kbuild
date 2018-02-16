@@ -67,7 +67,7 @@ CONFIG_QCOM_ESE_UPLOAD := n
 # Feature flags which are not (currently) configurable via Kconfig
 
 #Whether to build debug version
-BUILD_DEBUG_VERSION := 1
+BUILD_DEBUG_VERSION := 0
 
 #Enable this flag to build driver in diag version
 BUILD_DIAG_VERSION := 1
@@ -564,7 +564,6 @@ CDEFINES :=	-DANI_BUS_TYPE_PLATFORM=1 \
 		-DWLANTL_DEBUG\
 		-DWLAN_NS_OFFLOAD \
 		-DWLAN_ACTIVEMODE_OFFLOAD_FEATURE \
-		-DWLAN_FEATURE_HOLD_RX_WAKELOCK \
 		-DWLAN_SOFTAP_VSTA_FEATURE \
 		-DWLAN_FEATURE_ROAM_SCAN_OFFLOAD \
 		-DWLAN_FEATURE_GTK_OFFLOAD \
@@ -707,7 +706,7 @@ CDEFINES += -DEXISTS_MSM_SMSM
 endif
 
 # Fix build for GCC 4.7
-EXTRA_CFLAGS += -Wno-maybe-uninitialized -Wno-unused-function
+EXTRA_CFLAGS += -Wno-maybe-uninitialized -Wno-unused-function -Wno-unused-variable
 
 ifeq ($(CONFIG_WLAN_OFFLOAD_PACKETS),y)
 CDEFINES += -DWLAN_FEATURE_OFFLOAD_PACKETS

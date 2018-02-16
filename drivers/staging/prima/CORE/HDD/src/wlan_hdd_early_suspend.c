@@ -2251,6 +2251,7 @@ VOS_STATUS hdd_wlan_shutdown(void)
         vos_timer_stop(&pHddCtx->tx_rx_trafficTmr);
    }
    vos_flush_delayed_work(&pHddCtx->spoof_mac_addr_work);
+   vos_flush_delayed_work(&pHddCtx->ecsa_chan_change_work);
    vos_flush_work(&pHddCtx->sap_start_work);
    hdd_reset_all_adapters(pHddCtx);
 
@@ -2785,7 +2786,7 @@ err_unregister_pmops:
    hddDeregisterPmOps(pHddCtx);
 
 err_bap_stop:
-#if defined(CONFIG_POWERSUSPEND) || defined(CONFIG_HAS_EARLYSUSPEND)
+#ifdef CONFIG_HAS_EARLYSUSPEND
    hdd_unregister_mcast_bcast_filter(pHddCtx);
 #endif
    hdd_close_all_adapters(pHddCtx);
