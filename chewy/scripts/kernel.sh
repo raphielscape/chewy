@@ -108,7 +108,7 @@ echo -e "$ZIPNAME zip can be found at $FINAL_ZIP";
 if [[ ${success} == true ]]; then
     echo -e "Uploading ${ZIPNAME} to https://transfer.sh/";
     transfer "${FINAL_ZIP}";
-    ./deploy-tg.sh
+    ./chewy/scripts/deploy-tg.sh
 fi
 else
 echo -e "Zip Creation Failed =(";
