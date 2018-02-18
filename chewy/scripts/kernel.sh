@@ -38,7 +38,7 @@ export AROMA="${KERNELDIR}/chewy/aroma/";
 export ARCH="arm64";
 export SUBARCH="arm64";
 export KBUILD_BUILD_USER="raphielscape"
-export KBUILD_BUILD_HOST="travisbox"
+export KBUILD_BUILD_HOST="semaphorebox"
 export TOOLCHAIN="${HOME}/GNU/GCC7/";
 export DEFCONFIG="raphiel_defconfig";
 export ZIP_DIR="${KERNELDIR}/chewy/files/";
@@ -73,6 +73,9 @@ if [[ "$@" =~ "clean" ]]; then
     ${MAKE} clean
 fi
 
+curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADIgADTBCSGjYU8tTvyHO6Ag"  -d chat_id=@nubci;
+curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel from Raphiel started ;_;" -d chat_id=@nubci;
+
 ${MAKE} $DEFCONFIG;
 START=$(date +"%s");
 echo -e "Using ${JOBS} threads to compile"
@@ -105,6 +108,7 @@ echo -e "$ZIPNAME zip can be found at $FINAL_ZIP";
 if [[ ${success} == true ]]; then
     echo -e "Uploading ${ZIPNAME} to https://transfer.sh/";
     transfer "${FINAL_ZIP}";
+    ./chewy/scripts/deploy-tg.sh
 fi
 else
 echo -e "Zip Creation Failed =(";
