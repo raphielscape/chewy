@@ -2,8 +2,8 @@
 echo "" >> /system/vendor/bin/init.qcom.post_boot.sh
 
 echo " # Default Frequency and Governor" >> /system/vendor/bin/init.qcom.post_boot.sh
-echo " echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
-echo " echo 2016000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
+echo " echo 268800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
+echo " echo 1804800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
 echo " echo \"interactive\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" >> /system/vendor/bin/init.qcom.post_boot.sh
 echo " echo bfq > /sys/block/mmcblk0/queue/scheduler" >> /system/vendor/bin/init.qcom.post_boot.sh
 

@@ -47,7 +47,7 @@ alert(
 );
 
 menubox(
-  "\nInferno Installer",
+  "\nRaphielscape Installer",
   "<@center><b>\nReady to install</b>\n\n</@>",
   "",
   "menu.prop",
@@ -91,14 +91,13 @@ alert(
 selectbox(
   "\nCPU Settings","<@center><b>\nConfigure frequencies\n</b></@>","","cpu0.prop",
   "Minimum CPU Frequency", "", 2,
-  "650MHz","",1,
-  "1,0GHz","",0,
-  "1,4GHz","",0,
+  "268MHz","",1,
+  "480GHz","",0,
+  "650GHz","",0,
   "Maximum CPU Frequency", "", 2,
-  "2.0GHz","",0,
-  "1,9GHz","",1,
   "1,8GHz","",0,
-  "1,6GHz","",0
+  "1,6GHz","",1,
+  "1,4GHz","",0
 );
 
 selectbox(

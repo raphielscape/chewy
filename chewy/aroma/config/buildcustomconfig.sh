@@ -5,11 +5,11 @@ echo "" >> /system/vendor/bin/init.qcom.post_boot.sh
 echo "  # Minimum Global Frequency" >> /system/vendor/bin/init.qcom.post_boot.sh
 cpu0=`grep selected.1 /tmp/aroma/cpu0.prop | cut -d '=' -f2`
 if [ $cpu0 = 1 ]; then
-echo "  echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
+echo "  echo 268800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
 elif [ $cpu0 = 2 ]; then
-echo "  echo 1036800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
+echo "  echo 480000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
 else
-echo "  echo 1401600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
+echo "  echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
 fi
 
 echo "" >> /system/vendor/bin/init.qcom.post_boot.sh
@@ -17,13 +17,11 @@ echo "" >> /system/vendor/bin/init.qcom.post_boot.sh
 echo "  # Maximum Global Frequency" >> /system/vendor/bin/init.qcom.post_boot.sh
 cpu0=`grep selected.2 /tmp/aroma/cpu0.prop | cut -d '=' -f2`
 if [ $cpu0 = 1 ]; then
-echo "  echo 2016000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
-elif [ $cpu0 = 2 ]; then
-echo "  echo 1958400 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
-elif [ $cpu0 = 3 ]; then
 echo "  echo 1804800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
-else
+elif [ $cpu0 = 2 ]; then
 echo "  echo 1689600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
+else
+echo "  echo 1401600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" >> /system/vendor/bin/init.qcom.post_boot.sh
 fi
 
 echo "" >> /system/vendor/bin/init.qcom.post_boot.sh
