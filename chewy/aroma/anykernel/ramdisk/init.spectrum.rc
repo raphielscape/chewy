@@ -6,6 +6,8 @@ on property:sys.boot_completed=1
    # Set default profile on first boot
    exec u:r:init:s0 root root -- /init.spectrum.sh
    exec u:r:su:s0 root root -- /init.spectrum.sh
+   chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+   chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
    # Enable Spectrum support
    setprop spectrum.support 1
    # Add kernel name
@@ -14,6 +16,8 @@ on property:sys.boot_completed=1
 # Balance (default profile)
 on property:persist.spectrum.profile=0
     # CPU
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
     write /sys/devices/system/cpu/cpu0/cpufreq/interactive/enable_prediction 1
     write /sys/devices/system/cpu/cpu0/cpufreq/interactive/min_sample_time 700000
@@ -34,6 +38,8 @@ on property:persist.spectrum.profile=0
 # Performance (based on DrunkSauce Lite)
 on property:persist.spectrum.profile=1
     # CPU
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
     write /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load 80
     write /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay 0
@@ -62,6 +68,8 @@ on property:persist.spectrum.profile=1
 # Battery
 on property:persist.spectrum.profile=2
     # CPU
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor conservative
     write /sys/devices/system/cpu/cpu0/cpufreq/conservative/freq_step 8
     write /sys/devices/system/cpu/cpu0/cpufreq/conservative/down_threshold 70
@@ -84,6 +92,8 @@ on property:persist.spectrum.profile=2
 # Gaming
 on property:persist.spectrum.profile=3
     # CPU
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
     write /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load 80
     write /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay 0
