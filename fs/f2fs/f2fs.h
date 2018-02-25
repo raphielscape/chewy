@@ -24,13 +24,11 @@
 #include <linux/bio.h>
 #include <linux/blkdev.h>
 #include <linux/quotaops.h>
-#ifdef CONFIG_F2FS_FS_ENCRYPTION
-#include <linux/fscrypt_supp.h>
-#else
-#include <linux/fscrypt_notsupp.h>
-#endif
 #include <crypto/hash.h>
 #include <linux/writeback.h>
+
+#define __FS_HAS_ENCRYPTION IS_ENABLED(CONFIG_F2FS_FS_ENCRYPTION)
+#include <linux/fscrypt.h>
 
 #ifdef CONFIG_F2FS_CHECK_FS
 #define f2fs_bug_on(sbi, condition)	BUG_ON(condition)
@@ -205,11 +203,6 @@ static inline bool wq_has_sleeper(wait_queue_head_t *wq)
 static inline struct dentry *file_dentry(const struct file *file)
 {
 	return file->f_path.dentry;
-}
-
-static inline void inode_nohighmem(struct inode *inode)
-{
-	mapping_set_gfp_mask(inode->i_mapping, GFP_USER);
 }
 
 /**
@@ -1320,6 +1313,7 @@ struct f2fs_sb_info {
 	char *s_qf_names[F2FS_MAXQUOTAS];
 	int s_jquota_fmt;			/* Format of quota to use */
 #endif
+	struct list_head list;
 };
 
 #ifdef CONFIG_F2FS_FAULT_INJECTION
@@ -2996,6 +2990,11 @@ int f2fs_migrate_page(struct address_space *mapping, struct page *newpage,
  */
 int start_gc_thread(struct f2fs_sb_info *sbi);
 void stop_gc_thread(struct f2fs_sb_info *sbi);
+void start_all_gc_threads(void);
+void stop_all_gc_threads(void);
+void f2fs_sbi_list_add(struct f2fs_sb_info *sbi);
+void f2fs_sbi_list_del(struct f2fs_sb_info *sbi);
+
 block_t start_bidx_of_node(unsigned int node_ofs, struct inode *inode);
 int f2fs_gc(struct f2fs_sb_info *sbi, bool sync, bool background,
 			unsigned int segno);
@@ -3303,6 +3302,7 @@ static inline void f2fs_set_encrypted_inode(struct inode *inode)
 {
 #ifdef CONFIG_F2FS_FS_ENCRYPTION
 	file_set_encrypt(inode);
+	inode->i_flags |= S_ENCRYPTED;
 #endif
 }
 
