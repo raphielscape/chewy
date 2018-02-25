@@ -4349,6 +4349,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 			inode->i_op = &ext4_symlink_inode_operations;
 			ext4_set_aops(inode);
 		}
+		inode_nohighmem(inode);
 	} else if (S_ISCHR(inode->i_mode) || S_ISBLK(inode->i_mode) ||
 	      S_ISFIFO(inode->i_mode) || S_ISSOCK(inode->i_mode)) {
 		inode->i_op = &ext4_special_inode_operations;
@@ -5128,6 +5129,7 @@ int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 void ext4_dirty_inode(struct inode *inode, int flags)
 {
 	handle_t *handle;
+
 	if (flags == I_DIRTY_TIME)
 		return;
 	handle = ext4_journal_start(inode, EXT4_HT_INODE, 2);
