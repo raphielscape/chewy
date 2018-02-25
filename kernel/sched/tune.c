@@ -12,7 +12,7 @@
 #include "tune.h"
 
 #ifdef CONFIG_CGROUP_SCHEDTUNE
-static bool schedtune_initialized = false;
+static bool schedtune_initialized = true;
 #endif
 
 int sysctl_sched_cfs_boost __read_mostly;
