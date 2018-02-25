@@ -1516,6 +1516,7 @@ int generic_update_time(struct inode *inode, struct timespec *time, int flags)
 		inode->i_ctime = *time;
 	if (flags & S_MTIME)
 		inode->i_mtime = *time;
+
 	if (!(inode->i_sb->s_flags & MS_LAZYTIME) || (flags & S_VERSION))
 		iflags |= I_DIRTY_SYNC;
 	__mark_inode_dirty(inode, iflags);
@@ -1950,3 +1951,9 @@ void inode_set_flags(struct inode *inode, unsigned int flags,
 				  new_flags) != old_flags));
 }
 EXPORT_SYMBOL(inode_set_flags);
+
+void inode_nohighmem(struct inode *inode)
+{
+	mapping_set_gfp_mask(inode->i_mapping, GFP_USER);
+}
+EXPORT_SYMBOL(inode_nohighmem);
