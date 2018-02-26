@@ -5,6 +5,11 @@
 # Rewritten to use lists instead of if-statements.
 #
 
+#Wmacro-redefined
+#TODO: remove me
+ subdir-ccflags-y += \
+ 	-Wno-macro-redefined
+
 obj-y	:= nonet.o
 
 obj-$(CONFIG_NET)		:= socket.o core/
