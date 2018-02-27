@@ -91,13 +91,14 @@ alert(
 selectbox(
   "\nCPU Settings","<@center><b>\nConfigure frequencies\n</b></@>","","cpu0.prop",
   "Minimum CPU Frequency", "", 2,
-  "268MHz","",1,
-  "480GHz","",0,
-  "650GHz","",0,
+  "650GHz","",1,
+  "1.3GHz","",0,
+  "1.4GHz","",0,
   "Maximum CPU Frequency", "", 2,
-  "1,8GHz","",0,
-  "1,6GHz","",1,
-  "1,4GHz","",0
+  "2.0GHz","",0,
+  "1.9GHz","",0,
+  "1.8GHz","",0,
+  "1.6GHz","",1
 );
 
 selectbox(
