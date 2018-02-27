@@ -88,6 +88,8 @@ echo -e "Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.";
 
 if [[ ! -f "${IMAGE}" ]]; then
     echo -e "Build failed :P";
+    curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel from Raphiel stopped unexpectedly, @raphielscape headsup re ;_;" -d chat_id=@nubci;
+    curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADIgADTBCSGjYU8tTvyHO6Ag"  -d chat_id=@nubci;
     success=false;
     exit 1;
 else
@@ -112,6 +114,4 @@ if [[ ${success} == true ]]; then
 fi
 else
 echo -e "Zip Creation Failed =(";
-curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel from Raphiel stopped unexpectedly, @raphielscape headsup re ;_;" -d chat_id=@nubci;
-curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADIgADTBCSGjYU8tTvyHO6Ag"  -d chat_id=@nubci;
 fi
