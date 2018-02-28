@@ -152,9 +152,10 @@ static int padzero(unsigned long elf_bss)
  */
 static void get_atrandom_bytes(unsigned char *buf, size_t nbytes)
 {
-		unsigned char *p = buf;
-		while (nbytes) {
-	  unsigned int random_variable;
+	unsigned char *p = buf;
+
+	while (nbytes) {
+		unsigned int random_variable;
 		size_t chunk = min(nbytes, sizeof(random_variable));
 
 		random_variable = get_random_int();
