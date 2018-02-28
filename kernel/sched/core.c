@@ -2719,6 +2719,7 @@ u32 __weak get_freq_max_load(int cpu, u32 freq)
 
 DEFINE_PER_CPU(struct freq_max_load *, freq_max_load);
 static DEFINE_SPINLOCK(freq_max_load_lock);
+int sched_smt_power_savings = 0, sched_mc_power_savings = 2;
 
 int sched_update_freq_max_load(const cpumask_t *cpumask)
 {
