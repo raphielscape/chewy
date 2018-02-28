@@ -93,7 +93,7 @@ static unsigned int default_target_loads[] = {DEFAULT_TARGET_LOAD};
 #define DEFAULT_ABOVE_HISPEED_DELAY DEFAULT_TIMER_RATE
 static unsigned int default_above_hispeed_delay[] = {
 	DEFAULT_ABOVE_HISPEED_DELAY };
-#define DEFAULT_SCREEN_OFF_MAX 1555200
+#define DEFAULT_SCREEN_OFF_MAX 1689600
 
 struct cpufreq_electron_tunables {
 	int usage_count;
@@ -110,7 +110,7 @@ struct cpufreq_electron_tunables {
 	 * The minimum amount of time to spend at a frequency before we can ramp
 	 * down.
 	 */
-#define DEFAULT_MIN_SAMPLE_TIME (3 * USEC_PER_MSEC)
+#define DEFAULT_MIN_SAMPLE_TIME (80 * USEC_PER_MSEC)
 	unsigned long min_sample_time;
 	/*
 	 * The sample rate of the timer used to increase frequency
@@ -1212,7 +1212,7 @@ static ssize_t store_screen_off_maxfreq(struct cpufreq_electron_tunables *tunabl
 	int ret;
 	unsigned long val;
 
-	ret = kstrtoul(buf, 0, &val);
+	ret = strict_strtoul(buf, 0, &val);
 	if (ret < 0) return ret;
 	if (val < 384000) tunables->screen_off_maxfreq = DEFAULT_SCREEN_OFF_MAX;
 	else tunables->screen_off_maxfreq = val;
