@@ -1119,7 +1119,7 @@ static int fw_load_from_user_helper(struct firmware *firmware,
 	return _request_firmware_load(fw_priv, desc->opt_flags, timeout);
 }
 
-#ifdef CONFIG_FW_CACHE
+#ifdef CONFIG_PM_SLEEP
 /* kill pending requests without uevent to avoid blocking suspend */
 static void kill_requests_without_uevent(void)
 {
@@ -1597,7 +1597,7 @@ request_firmware_nowait_into_buf(
 }
 EXPORT_SYMBOL_GPL(request_firmware_nowait_into_buf);
 
-#ifdef CONFIG_FW_CACHE
+#ifdef CONFIG_PM_SLEEP
 static ASYNC_DOMAIN_EXCLUSIVE(fw_cache_domain);
 
 /**
@@ -1937,7 +1937,7 @@ static void __init fw_cache_init(void)
 	INIT_LIST_HEAD(&fw_cache.head);
 	fw_cache.state = FW_LOADER_NO_CACHE;
 
-#ifdef CONFIG_FW_CACHE
+#ifdef CONFIG_PM_SLEEP
 	spin_lock_init(&fw_cache.name_lock);
 	INIT_LIST_HEAD(&fw_cache.fw_names);
 

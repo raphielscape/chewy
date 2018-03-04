@@ -4088,48 +4088,6 @@ static int mdss_dsi_parse_ctrl_params(struct platform_device *ctrl_pdev,
 
 }
 
-u32 te_count;
-static irqreturn_t te_interrupt(int irq, void *data)
-{
-	disable_irq_nosync(irq);
-
-	te_count++;
-
-	enable_irq(irq);
-	return IRQ_HANDLED;
-}
-
-int init_te_irq(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
-{
-	int rc = -1;
-	int irq;
-	if (gpio_is_valid(ctrl_pdata->disp_te_gpio)) {
-		rc = gpio_request(ctrl_pdata->disp_te_gpio, "te-gpio");
-		if (rc < 0) {
-			pr_err("%s: gpio_request fail rc=%d\n", __func__, rc);
-			return rc ;
-		}
-		rc = gpio_direction_input(ctrl_pdata->disp_te_gpio);
-		if (rc < 0) {
-			pr_err("%s: gpio_direction_input fail rc=%d\n", __func__, rc);
-			return rc ;
-		}
-		irq = gpio_to_irq(ctrl_pdata->disp_te_gpio);
-		pr_err("%s:liujia  irq = %d\n", __func__, irq);
-		rc = request_threaded_irq(irq, te_interrupt, NULL,
-			IRQF_TRIGGER_RISING|IRQF_ONESHOT,
-			"te-irq", ctrl_pdata);
-		if (rc < 0) {
-			pr_err("%s: request_irq fail rc=%d\n", __func__, rc);
-			return rc ;
-		}
-	} else {
-		 pr_err("%s:liujia irq gpio not provided\n", __func__);
-		 return rc ;
-	}
-		return 0;
-}
-
 static int mdss_dsi_parse_gpio_params(struct platform_device *ctrl_pdev,
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
@@ -4294,10 +4252,6 @@ int dsi_panel_device_register(struct platform_device *ctrl_pdev,
 		ctrl_pdata->check_status = mdss_dsi_reg_status_check;
 	else if (ctrl_pdata->status_mode == ESD_BTA)
 		ctrl_pdata->check_status = mdss_dsi_bta_status_check;
-	else if (ctrl_pdata->status_mode == ESD_TE_NT35596) {
-		ctrl_pdata->check_status = mdss_dsi_TE_NT35596_check;
-		init_te_irq(ctrl_pdata);
-	}
 
 	if (ctrl_pdata->status_mode == ESD_MAX) {
 		pr_err("%s: Using default BTA for ESD check\n", __func__);

@@ -170,11 +170,6 @@ config WANT_DEV_COREDUMP
 	help
 	  Drivers should "select" this option if they desire to use the
 	  device coredump mechanism.
-	  
-config FW_CACHE
-       bool "Enable firmware caching during suspend"
-       depends on PM_SLEEP
-       default n
 
 config ALLOW_DEV_COREDUMP
 	bool "Allow device coredump" if EXPERT

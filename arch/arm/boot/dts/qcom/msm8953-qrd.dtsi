@@ -333,6 +333,7 @@
 	qcom,warm-bat-decidegc = <450>;
 	qcom,hot-bat-decidegc = <550>;
 	qcom,bad-battery-detection-enable;
+	qcom,hold-soc-while-full;
 };
 
 &blsp1_uart0 {
