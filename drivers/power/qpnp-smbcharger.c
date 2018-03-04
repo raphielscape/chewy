@@ -1,4 +1,5 @@
 /* Copyright (c) 2014-2018 The Linux Foundation. All rights reserved.
+ * Copyright (C) 2017 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -4922,6 +4923,7 @@ static int smbchg_restricted_charging(struct smbchg_chip *chip, bool enable)
 }
 extern void ist30xx_set_ta_mode(bool mode);
 extern void tpd_usb_plugin(bool mode);
+extern void gtp_usb_plugin(bool mode);
 int set_usb_charge_mode_par = 0;
 static void handle_usb_removal(struct smbchg_chip *chip)
 {
@@ -4932,6 +4934,8 @@ static void handle_usb_removal(struct smbchg_chip *chip)
 		ist30xx_set_ta_mode(0);
 	} else if (set_usb_charge_mode_par == 2) {
 		tpd_usb_plugin(0);
+	} else if (set_usb_charge_mode_par == 3) {
+		gtp_usb_plugin(0);
 	}
 printk("set_usb_charge_mode_par off = %d\n", set_usb_charge_mode_par);
 	pr_smb(PR_STATUS, "triggered\n");
@@ -5014,6 +5018,8 @@ static void handle_usb_insertion(struct smbchg_chip *chip)
 		ist30xx_set_ta_mode(1);
 	} else if (set_usb_charge_mode_par == 2) {
 		tpd_usb_plugin(1);
+	} else if (set_usb_charge_mode_par == 3) {
+		gtp_usb_plugin(1);
 	}
 	pr_smb(PR_STATUS, "triggered\n");
 	/* usb inserted */
