@@ -409,9 +409,6 @@ struct cpufreq_govinfo {
 };
 extern struct atomic_notifier_head cpufreq_govinfo_notifier_list;
 
-void cpufreq_notify_utilization(struct cpufreq_policy *policy,
-		unsigned int load);
-
 #else /* CONFIG_CPU_FREQ */
 static inline int cpufreq_register_notifier(struct notifier_block *nb,
 						unsigned int list)

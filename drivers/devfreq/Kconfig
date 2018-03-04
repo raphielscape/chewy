@@ -171,7 +171,6 @@ config DEVFREQ_GOV_MEMLAT
 	  this uses target specific counters it can conflict with existing profiling
 	  tools.
 
-
 comment "DEVFREQ Drivers"
 
 config ARM_EXYNOS4_BUS_DEVFREQ
@@ -198,9 +197,6 @@ config ARM_EXYNOS5_BUS_DEVFREQ
 
 config DEVFREQ_SIMPLE_DEV
 	tristate "Device driver for simple clock device with no status info"
-	select DEVFREQ_GOV_PERFORMANCE
-	select DEVFREQ_GOV_POWERSAVE
-	select DEVFREQ_GOV_USERSPACE
 	select DEVFREQ_GOV_CPUFREQ
 	help
 	  Device driver for simple devices that control their frequency using
@@ -209,9 +205,6 @@ config DEVFREQ_SIMPLE_DEV
 config MSM_DEVFREQ_DEVBW
 	bool "MSM DEVFREQ device for device master <-> slave IB/AB BW voting"
 	depends on ARCH_MSM
-	select DEVFREQ_GOV_PERFORMANCE
-	select DEVFREQ_GOV_POWERSAVE
-	select DEVFREQ_GOV_USERSPACE
 	select DEVFREQ_GOV_CPUFREQ
 	default n
 	help

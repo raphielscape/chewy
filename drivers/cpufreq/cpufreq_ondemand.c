@@ -559,17 +559,10 @@ static int od_init(struct dbs_data *dbs_data, struct cpufreq_policy *policy)
 		*/
 		dbs_data->min_sampling_rate = MICRO_FREQUENCY_MIN_SAMPLE_RATE;
 	} else {
-		tuners->up_threshold = DEF_FREQUENCY_UP_THRESHOLD;
-
 		/* For correct statistics, we need 10 ticks for each measure */
 		dbs_data->min_sampling_rate = MIN_SAMPLING_RATE_RATIO *
 			jiffies_to_usecs(10);
 	}
-
-	tuners->sampling_down_factor = DEF_SAMPLING_DOWN_FACTOR;
-	tuners->ignore_nice_load = 0;
-	tuners->powersave_bias = default_powersave_bias;
-	tuners->io_is_busy = should_io_be_busy();
 
 	dbs_data->tuners = tuners;
 	mutex_init(&dbs_data->mutex);
@@ -578,7 +571,7 @@ static int od_init(struct dbs_data *dbs_data, struct cpufreq_policy *policy)
 
 static void od_exit(struct dbs_data *dbs_data)
 {
-	kfree(dbs_data->tuners);
+	//nothing to do
 }
 
 define_get_cpu_dbs_routines(od_cpu_dbs_info);
