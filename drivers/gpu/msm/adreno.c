@@ -1021,6 +1021,8 @@ static int adreno_probe(struct platform_device *pdev)
 	/* Initialize coresight for the target */
 	adreno_coresight_init(adreno_dev);
 
+	adreno_input_handler.private = device;
+
 #ifdef CONFIG_INPUT
 	if (!device->pwrctrl.input_disable) {
 		adreno_input_handler.private = device;
