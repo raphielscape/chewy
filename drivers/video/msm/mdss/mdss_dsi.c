@@ -2911,12 +2911,6 @@ static struct device_node *mdss_dsi_find_panel_of_node(
 		if (!strcmp(panel_name, NONE_PANEL))
 			goto exit;
 
-		if (!strcmp(panel_name, "qcom,mdss_dsi_otm1911_fhd_video"))
-			panel_suspend_reset_flag = 2;
-
-		if (!strcmp(panel_name, "qcom,mdss_dsi_ili9885_boe_fhd_video"))
-			panel_suspend_reset_flag = 3;
-
 		mdss_node = of_parse_phandle(pdev->dev.of_node,
 			"qcom,mdss-mdp", 0);
 		if (!mdss_node) {
