@@ -45,8 +45,8 @@ export ZIP_DIR="${KERNELDIR}/chewy/files/";
 export IMAGE="${OUTDIR}/arch/${ARCH}/boot/Image.gz-dtb";
 
 if [[ -z "${JOBS}" ]]; then
-#    export JOBS="$(grep -c '^processor' /proc/cpuinfo)";
-    export JOBS=64;
+    export JOBS="$(grep -c '^processor' /proc/cpuinfo)";
+#    export JOBS=64;
 fi
 
 export MAKE="make O=${OUTDIR}";
@@ -56,7 +56,7 @@ export TCVERSION1="$(${CROSS_COMPILE}gcc --version | head -1 |\
 awk -F '(' '{print $2}' | awk '{print tolower($1)}')"
 export TCVERSION2="$(${CROSS_COMPILE}gcc --version | head -1 |\
 awk -F ')' '{print $2}' | awk '{print tolower($1)}')"
-export ZIPNAME="chewy-oreo-${DEVICE}-$(date +%Y%m%d-%H%M).zip"
+export ZIPNAME="weeb-oreo-${DEVICE}-$(date +%Y%m%d-%H%M).zip"
 export FINAL_ZIP="${ZIP_DIR}/${ZIPNAME}"
 
 [ ! -d "${ZIP_DIR}" ] && mkdir -pv ${ZIP_DIR}
