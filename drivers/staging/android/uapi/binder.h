@@ -44,7 +44,6 @@ enum {
 enum flat_binder_object_shifts {
 	FLAT_BINDER_FLAG_SCHED_POLICY_SHIFT = 9,
 };
-
 /**
  * enum flat_binder_object_flags - flags for use in flat_binder_object.flags
  */
@@ -78,7 +77,6 @@ enum flat_binder_object_flags {
 	 */
 	FLAT_BINDER_FLAG_SCHED_POLICY_MASK =
 		3U << FLAT_BINDER_FLAG_SCHED_POLICY_SHIFT,
-
 	/**
 	 * @FLAT_BINDER_FLAG_INHERIT_RT: whether the node inherits RT policy
 	 *
@@ -178,7 +176,6 @@ enum {
 
 /* struct binder_fd_array_object - object describing an array of fds in a buffer
  * @hdr:		common header structure
- * @pad:		padding to ensure correct alignment
  * @num_fds:		number of file descriptors in the buffer
  * @parent:		index in offset array to buffer holding the fd array
  * @parent_offset:	start offset of fd array in the buffer
@@ -199,7 +196,6 @@ enum {
  */
 struct binder_fd_array_object {
 	struct binder_object_header	hdr;
-	__u32				pad;
 	binder_size_t			num_fds;
 	binder_size_t			parent;
 	binder_size_t			parent_offset;
