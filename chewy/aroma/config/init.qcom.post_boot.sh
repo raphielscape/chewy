@@ -43,35 +43,24 @@
      chmod -h 664 /sys/devices/system/cpu/cpu1/online
      chmod -h 664 /sys/devices/system/cpu/cpu2/online
      chmod -h 664 /sys/devices/system/cpu/cpu3/online
-         chown -h system /sys/module/msm_dcvs/cores/cpu0/slack_time_max_us
-         chown -h system /sys/module/msm_dcvs/cores/cpu0/slack_time_min_us
-         chown -h system /sys/module/msm_mpdecision/slack_time_max_us
-         chown -h system /sys/module/msm_mpdecision/slack_time_min_us
-         chmod -h 664 /sys/module/msm_dcvs/cores/cpu0/slack_time_max_us
-         chmod -h 664 /sys/module/msm_dcvs/cores/cpu0/slack_time_min_us
-         chmod -h 664 /sys/module/msm_mpdecision/slack_time_max_us
-         chmod -h 664 /sys/module/msm_mpdecision/slack_time_min_us
-         
-  # scheduler settings
-  echo 3 > /proc/sys/kernel/sched_window_stats_policy
-  echo 3 > /proc/sys/kernel/sched_ravg_hist_size
+     chown -h system /sys/module/msm_dcvs/cores/cpu0/slack_time_max_us
+     chown -h system /sys/module/msm_dcvs/cores/cpu0/slack_time_min_us
+     chown -h system /sys/module/msm_mpdecision/slack_time_max_us
+     chown -h system /sys/module/msm_mpdecision/slack_time_min_us
+     chmod -h 664 /sys/module/msm_dcvs/cores/cpu0/slack_time_max_us
+     chmod -h 664 /sys/module/msm_dcvs/cores/cpu0/slack_time_min_us
+     chmod -h 664 /sys/module/msm_mpdecision/slack_time_max_us
+     chmod -h 664 /sys/module/msm_mpdecision/slack_time_min_us
 
   # task packing settings
-  echo 0 > /sys/devices/system/cpu/cpu0/sched_static_cpu_pwr_cost
-  echo 0 > /sys/devices/system/cpu/cpu1/sched_static_cpu_pwr_cost
-  echo 0 > /sys/devices/system/cpu/cpu2/sched_static_cpu_pwr_cost
-  echo 0 > /sys/devices/system/cpu/cpu3/sched_static_cpu_pwr_cost
-  echo 0 > /sys/devices/system/cpu/cpu4/sched_static_cpu_pwr_cost
-  echo 0 > /sys/devices/system/cpu/cpu5/sched_static_cpu_pwr_cost
-  echo 0 > /sys/devices/system/cpu/cpu6/sched_static_cpu_pwr_cost
-  echo 0 > /sys/devices/system/cpu/cpu7/sched_static_cpu_pwr_cost
-
-  # init task load, restrict wakeups to preferred cluster
-  echo 15 > /proc/sys/kernel/sched_init_task_load
-  # spill load is set to 100% by default in the kernel
-  echo 3 > /proc/sys/kernel/sched_spill_nr_run
-  # Apply inter-cluster load balancer restrictions
-  echo 1 > /proc/sys/kernel/sched_restrict_cluster_spill
+     echo 0 > /sys/devices/system/cpu/cpu0/sched_static_cpu_pwr_cost
+     echo 0 > /sys/devices/system/cpu/cpu1/sched_static_cpu_pwr_cost
+     echo 0 > /sys/devices/system/cpu/cpu2/sched_static_cpu_pwr_cost
+     echo 0 > /sys/devices/system/cpu/cpu3/sched_static_cpu_pwr_cost
+     echo 0 > /sys/devices/system/cpu/cpu4/sched_static_cpu_pwr_cost
+     echo 0 > /sys/devices/system/cpu/cpu5/sched_static_cpu_pwr_cost
+     echo 0 > /sys/devices/system/cpu/cpu6/sched_static_cpu_pwr_cost
+     echo 0 > /sys/devices/system/cpu/cpu7/sched_static_cpu_pwr_cost
 
   # enable thermal & BCL core_control now
   echo Y > /sys/module/msm_thermal/core_control/enabled
@@ -88,14 +77,6 @@
   # Enable low power modes
   echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
   
-  # Drop Cache things, well, kswapd dirty workaround though
-  echo 3 > /proc/sys/vm/drop_caches
-
-  # SMP scheduler
-  echo 85 > /proc/sys/kernel/sched_upmigrate
-  echo 85 > /proc/sys/kernel/sched_downmigrate
-  echo 19 > /proc/sys/kernel/sched_upmigrate_min_nice
-
   # Enable sched guided freq control
   echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_sched_load
   echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_migration_notif
