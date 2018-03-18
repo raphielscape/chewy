@@ -23,9 +23,8 @@ ifneq ($(DTB_NAMES),)
 DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
 DTB_OBJS := $(addprefix $(obj)/dts/,$(DTB_LIST))
 else
-DTB_LIST := $(dtb-y)
+DTB_OBJS := $(shell find $(obj)/dts/ -name \*.dtb)
 endif
-DTB_OBJS := $(addprefix $(obj)/dts/qcom/,$(DTB_LIST))
 
 $(obj)/Image: vmlinux FORCE
 	$(call if_changed,objcopy)
@@ -39,6 +38,9 @@ $(obj)/Image.gz-dtb: $(obj)/Image.gz $(DTB_OBJS) FORCE
 $(obj)/Image-dtb-hdr: $(obj)/Image FORCE
 	echo -n 'UNCOMPRESSED_IMG' > $@ && \
 	$(call size_append, $(filter-out FORCE,$^)) >> $@
+
+$(obj)/Image-dtb: $(obj)/Image-dtb-hdr $(obj)/Image $(DTB_OBJS) FORCE
+	$(call if_changed,cat)
 
 install: $(obj)/Image
 	$(CONFIG_SHELL) $(srctree)/$(src)/install.sh $(KERNELRELEASE) \
