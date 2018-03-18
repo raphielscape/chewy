@@ -32,7 +32,6 @@
 #include <linux/suspend.h>
 #include <linux/regulator/rpm-smd-regulator.h>
 #include <linux/uaccess.h>
-#include <linux/clk/msm-clk-provider.h>
 #include <soc/qcom/clock-local2.h>
 #include <soc/qcom/clock-pll.h>
 
@@ -157,6 +156,7 @@ static struct mux_div_clk a53ssmux_perf = {
 	},
 	.c = {
 		.dbg_name = "a53ssmux_perf",
+		.flags = CLKFLAG_NO_RATE_CACHE,
 		.ops = &clk_ops_mux_div_clk,
 		CLK_INIT(a53ssmux_perf.c),
 	},
@@ -178,6 +178,7 @@ static struct mux_div_clk a53ssmux_pwr = {
 	},
 	.c = {
 		.dbg_name = "a53ssmux_pwr",
+		.flags = CLKFLAG_NO_RATE_CACHE,
 		.ops = &clk_ops_mux_div_clk,
 		CLK_INIT(a53ssmux_pwr.c),
 	},
@@ -397,7 +398,6 @@ static struct mux_clk cpu_debug_ter_mux = {
 	.base = &virt_bases[APCS0_DBG_BASE],
 	.c = {
 		.dbg_name = "cpu_debug_ter_mux",
-		.flags = CLKFLAG_NO_RATE_CACHE,
 		.ops = &clk_ops_gen_mux,
 		CLK_INIT(cpu_debug_ter_mux.c),
 	},

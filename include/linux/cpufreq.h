@@ -77,7 +77,6 @@ struct cpufreq_policy {
 	unsigned int		max;    /* in kHz */
 	unsigned int		cur;    /* in kHz, only needed if cpufreq
 					 * governors are used */
-	unsigned int        util; 		  /* CPU utilization at max frequency */
 	unsigned int		restore_freq; /* = policy->cur before transition */
 	unsigned int		suspend_freq; /* freq to set during suspend */
 
@@ -118,9 +117,6 @@ struct cpufreq_policy {
 
 	/* For cpufreq driver's internal use */
 	void			*driver_data;
-#ifdef CONFIG_MSM_TRACK_FREQ_TARGET_INDEX
-	unsigned int	cur_index;
-#endif
 };
 
 /* Only for ACPI */
@@ -459,10 +455,6 @@ static inline unsigned long cpufreq_scale(unsigned long old, u_int div,
 #define CPUFREQ_POLICY_POWERSAVE	(1)
 #define CPUFREQ_POLICY_PERFORMANCE	(2)
 
-/* Minimum frequency cutoff to notify the userspace about cpu utilization
- * changes */
-#define MIN_CPU_UTIL_NOTIFY   40
-
 /* Governor Events */
 #define CPUFREQ_GOV_START	1
 #define CPUFREQ_GOV_STOP	2
@@ -664,21 +656,7 @@ int cpufreq_generic_init(struct cpufreq_policy *policy,
  *                         CPUFREQ STATS                             *
  *********************************************************************/
 
-#ifdef CONFIG_CPU_FREQ_STAT
 void acct_update_power(struct task_struct *p, cputime_t cputime);
-void cpufreq_task_stats_init(struct task_struct *p);
-void cpufreq_task_stats_exit(struct task_struct *p);
-int proc_time_in_state_show(struct seq_file *m, struct pid_namespace *ns,
-	struct pid *pid, struct task_struct *p);
-void cpufreq_task_stats_remove_uids(uid_t uid_start, uid_t uid_end);
-#else
-static inline void acct_update_power(struct task_struct *p,
-	cputime_t cputime) {}
-static inline void cpufreq_task_stats_init(struct task_struct *p) {}
-static inline void cpufreq_task_stats_exit(struct task_struct *p) {}
-static inline void cpufreq_task_stats_remove_uids(uid_t uid_start,
-	uid_t uid_end) {}
-#endif
 
 struct sched_domain;
 unsigned long cpufreq_scale_freq_capacity(struct sched_domain *sd, int cpu);
