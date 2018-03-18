@@ -204,7 +204,7 @@ static void set_dload_mode(int on)
 {
 	return;
 }
-
+#if 0
 static void enable_emergency_dload_mode(void)
 {
 	pr_err("dload mode is not enabled on target\n");
