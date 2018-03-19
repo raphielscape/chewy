@@ -21,12 +21,11 @@
 #include <linux/list.h>
 #include <linux/proc_fs.h>
 #include <linux/profile.h>
+#include <linux/rtmutex.h>
 #include <linux/sched.h>
 #include <linux/seq_file.h>
 #include <linux/slab.h>
 #include <linux/uaccess.h>
-#include <linux/rtmutex.h>
-#include <linux/cpufreq.h>
 
 #define UID_HASH_BITS	10
 DECLARE_HASHTABLE(hash_table, UID_HASH_BITS);
@@ -179,8 +178,7 @@ static ssize_t uid_remove_write(struct file *file,
 	struct hlist_node *tmp;
 	char uids[128];
 	char *start_uid, *end_uid = NULL;
-	long int start = 0, end = 0;
-	uid_t uid_start, uid_end;
+	long int uid_start = 0, uid_end = 0;
 
 	if (count >= sizeof(uids))
 		count = sizeof(uids) - 1;
@@ -195,32 +193,15 @@ static ssize_t uid_remove_write(struct file *file,
 	if (!start_uid || !end_uid)
 		return -EINVAL;
 
-	if (kstrtol(start_uid, 10, &start) != 0 ||
-		kstrtol(end_uid, 10, &end) != 0) {
+	if (kstrtol(start_uid, 10, &uid_start) != 0 ||
+		kstrtol(end_uid, 10, &uid_end) != 0) {
 		return -EINVAL;
 	}
-
-#define UID_T_MAX (((uid_t)~0U)-1)
-	if ((start < 0) || (end < 0) ||
-		(start > UID_T_MAX) || (end > UID_T_MAX)) {
-		return -EINVAL;
-	}
-
-	uid_start = start;
-	uid_end = end;
-
-	/* TODO need to unify uid_sys_stats interface with uid_time_in_state.
-	 * Here we are reusing remove_uid_range to reduce the number of
-	 * sys calls made by userspace clients, remove_uid_range removes uids
-	 * from both here as well as from cpufreq uid_time_in_state
-	 */
-	cpufreq_task_stats_remove_uids(uid_start, uid_end);
-
 	rt_mutex_lock(&uid_lock);
 
 	for (; uid_start <= uid_end; uid_start++) {
 		hash_for_each_possible_safe(hash_table, uid_entry, tmp,
-							hash, uid_start) {
+							hash, (uid_t)uid_start) {
 			if (uid_start == uid_entry->uid) {
 				hash_del(&uid_entry->hash);
 				kfree(uid_entry);
@@ -229,7 +210,6 @@ static ssize_t uid_remove_write(struct file *file,
 	}
 
 	rt_mutex_unlock(&uid_lock);
-
 	return count;
 }
 
@@ -239,6 +219,7 @@ static const struct file_operations uid_remove_fops = {
 	.write		= uid_remove_write,
 };
 
+#if IS_ENABLED(CONFIG_TASK_IO_ACCOUNTING)
 static u64 compute_write_bytes(struct task_struct *task)
 {
 	if (task->ioac.write_bytes <= task->ioac.cancelled_write_bytes)
@@ -246,18 +227,31 @@ static u64 compute_write_bytes(struct task_struct *task)
 
 	return task->ioac.write_bytes - task->ioac.cancelled_write_bytes;
 }
+#endif
 
+#if IS_ENABLED(CONFIG_TASK_IO_ACCOUNTING) || IS_ENABLED(CONFIG_TASK_XACCT)
 static void add_uid_io_stats(struct uid_entry *uid_entry,
 			struct task_struct *task, int slot)
 {
 	struct io_stats *io_slot = &uid_entry->io[slot];
 
+#if IS_ENABLED(CONFIG_TASK_IO_ACCOUNTING)
 	io_slot->read_bytes += task->ioac.read_bytes;
 	io_slot->write_bytes += compute_write_bytes(task);
+#endif
+#if IS_ENABLED(CONFIG_TASK_XACCT)
 	io_slot->rchar += task->ioac.rchar;
 	io_slot->wchar += task->ioac.wchar;
 	io_slot->fsync += task->ioac.syscfs;
+#endif
 }
+#else
+static void add_uid_io_stats(struct uid_entry *uid_entry,
+			struct task_struct *task, int slot)
+{
+	return;
+}
+#endif
 
 static void compute_uid_io_bucket_stats(struct io_stats *io_bucket,
 					struct io_stats *io_curr,
