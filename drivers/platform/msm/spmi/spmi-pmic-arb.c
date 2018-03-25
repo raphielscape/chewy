@@ -933,12 +933,19 @@ __pmic_arb_periph_irq(int irq, void *dev_id, bool show)
 	u32 irq_status = 0;
 
 
+	/* status based dispatch */
+	bool acc_valid = false;
+	u32 irq_status = 0;
+
 	dev_dbg(pmic_arb->dev, "Peripheral interrupt detected\n");
 
 	/* Check the accumulated interrupt status */
 	for (i = first; i <= last; ++i) {
 		status = readl_relaxed(pmic_arb->intr +
 					pmic_arb->ver->owner_acc_status(ee, i));
+		if (status)
+			acc_valid = true;
+
 		if (status)
 			acc_valid = true;
 

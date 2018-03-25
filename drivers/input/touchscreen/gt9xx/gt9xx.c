@@ -1943,9 +1943,7 @@ Output:
 	Executive outcomes.
 	0: succeed.
 *******************************************************/
-
-static int goodix_ts_probe(struct i2c_client *client,
-			   const struct i2c_device_id *id)
+static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
 	struct goodix_ts_platform_data *pdata;
 	struct goodix_ts_data *ts;
@@ -1972,6 +1970,7 @@ static int goodix_ts_probe(struct i2c_client *client,
 	}
 
 	i2c_connect_client = client;
+	gt9xx_flag = 1;
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
 		dev_err(&client->dev, "GTP I2C not supported\n");
