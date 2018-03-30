@@ -38,7 +38,6 @@ dump_boot;
 # begin ramdisk changes
 
 # add inferno initialization script
-insert_line init.rc "import /init.chewy.rc" after "import /init.environ.rc" "import /init.chewy.rc";
 insert_line init.rc "import /init.spectrum.rc" after "import /init.trace.rc" "import /init.spectrum.rc";
 cp -rpf $patch/thermal-engine.conf /system/etc/thermal-engine.conf
 
