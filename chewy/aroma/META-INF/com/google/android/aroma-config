@@ -83,7 +83,7 @@ endif;
 if prop("menu.prop", "selected")=="2" then
 alert(
   "WARNING:",
-  "<b>Warning!</b> The options for setting manually custom ramdisk, if your not understand to setting manually just use automatic (one-tap install). \n\n@raphielscape: LOL JUST DO THIS BLYAT LMAO\n\n",
+  "<b>Warning!</b> The options for setting manually custom ramdisk, if your not understand to setting manually just use automatic (one-tap install). \n\n@if you damnly know nothing about this, don't continue lol, it's gonna modifying your vendor init, so you'll need to fully reinstall your Vendor image if you chose this one or just restore init.qcom.post_boot.sh, if you going into this restore wae, heads up to telegram on @chewykernel lel\n\n",
   "@dragon",
   "OK"
 );
