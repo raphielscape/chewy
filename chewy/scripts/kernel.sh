@@ -40,7 +40,7 @@ export SUBARCH="arm64";
 export KBUILD_BUILD_USER="raphielscape"
 export KBUILD_BUILD_HOST="semaphorebox"
 export TOOLCHAIN="${HOME}/GNU/GCC7/";
-export DEFCONFIG="mido_defconfig";
+export DEFCONFIG="raphiel_defconfig";
 export ZIP_DIR="${KERNELDIR}/chewy/files/";
 export IMAGE="${OUTDIR}/arch/${ARCH}/boot/Image.gz-dtb";
 
