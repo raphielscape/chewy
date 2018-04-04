@@ -669,7 +669,6 @@ config MSM_PERFORMANCE_CPUFREQ_LIMITS_VOTING_ONLY
 	 Setting this flag to true will restrict msm_performance driver's
 	 capabilities to setting min/max CPU frequencies only.
 
-endif # ARCH_QCOM
 
 config MSM_SUBSYSTEM_RESTART
 	bool "MSM Subsystem Restart"
