@@ -73,7 +73,7 @@ if [[ "$@" =~ "clean" ]]; then
     ${MAKE} clean
 fi
 
-curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADIgADTBCSGjYU8tTvyHO6Ag"  -d chat_id=@raphiel_ci;
+curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBAADNwADp8uuGBHV2tl40w7WAg"  -d chat_id=@raphiel_ci;
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel Treble from Raphiel started ;_;" -d chat_id=@raphiel_ci;
 
 ${MAKE} $DEFCONFIG;
