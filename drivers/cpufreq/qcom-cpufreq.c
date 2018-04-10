@@ -30,7 +30,7 @@
 #include <linux/of.h>
 #include <trace/events/power.h>
 
-static const unsigned long arg_cpu_max_c1 = 2016000;
+static const unsigned long arg_cpu_max_c1 = 2208000;
 
 static DEFINE_MUTEX(l2bw_lock);
 
