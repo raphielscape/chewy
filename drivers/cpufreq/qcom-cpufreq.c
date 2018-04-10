@@ -24,10 +24,13 @@
 #include <linux/cpumask.h>
 #include <linux/suspend.h>
 #include <linux/clk.h>
+#include <linux/clk/msm-clk-provider.h>
 #include <linux/err.h>
 #include <linux/platform_device.h>
 #include <linux/of.h>
 #include <trace/events/power.h>
+
+static const unsigned long arg_cpu_max_c1 = 2016000;
 
 static DEFINE_MUTEX(l2bw_lock);
 
@@ -368,6 +371,12 @@ static struct cpufreq_frequency_table *cpufreq_parse_dt(struct device *dev,
 		if (i > 0 && f <= ftbl[i-1].frequency)
 			break;
 
+		//Custom max freq
+		if (f > arg_cpu_max_c1) {
+			nf = i;
+			break;
+		}
+
 		ftbl[i].driver_data = i;
 		ftbl[i].frequency = f;
 	}
@@ -398,6 +407,7 @@ static int __init msm_cpufreq_probe(struct platform_device *pdev)
 		c = devm_clk_get(dev, clk_name);
 		if (IS_ERR(c))
 			return PTR_ERR(c);
+		c->flags |= CLKFLAG_NO_RATE_CACHE;
 		cpu_clk[cpu] = c;
 	}
 	hotplug_ready = true;
