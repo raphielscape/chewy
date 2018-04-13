@@ -67,3 +67,11 @@
 };
 
 #include "mido/msm8953-mido.dtsi"
+
+&firmware {
+	android {
+		fstab {
+			/delete-node/ vendor;
+		};
+	};
+};

@@ -17,8 +17,6 @@ run_program("/tmp/busybox", "mount", "/data");
 set_progress(0.3);
 ui_print("Mounting /system");
 run_program("/tmp/busybox", "mount", "/system");
-ui_print("Mounting /vendor");
-run_program("/tmp/busybox", "mount", "/vendor");
 
 
 set_progress(0.3);
@@ -33,12 +31,12 @@ set_perm(0, 0, 0777, "/tmp/anykernel/tools/unpackbootimg");
 
 set_progress(0.5);
 ui_print("Doing sum fuk, lemme smash");
-package_extract_file("config/init.qcom.post_boot.sh", "/vendor/bin/init.qcom.post_boot.sh");
+package_extract_file("config/init.qcom.post_boot.sh", "/system/vendor/bin/init.qcom.post_boot.sh");
 package_extract_file("config/buildconfig.sh", "/tmp/buildconfig.sh");
 package_extract_file("config/buildcustomconfig.sh", "/tmp/buildcustomconfig.sh");
 set_perm(0, 0, 0777, "/tmp/buildconfig.sh");
 set_perm(0, 0, 0777, "/tmp/buildcustomconfig.sh");
-set_perm(0, 0, 0777, "/vendor/bin/init.qcom.post_boot.sh");
+set_perm(0, 0, 0777, "/system/vendor/bin/init.qcom.post_boot.sh");
 
 set_progress(0.6);
 ui_print("Running Setup Smash...");
