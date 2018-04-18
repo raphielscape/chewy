@@ -750,7 +750,7 @@
 		interrupt-names = "qup_irq";
 		interrupts = <0 96 0>;
 		qcom,clk-freq-out = <400000>;
-		qcom,clk-freq-in  = <19200000>;
+		qcom,clk-freq-in = <19200000>;
 		clock-names = "iface_clk", "core_clk";
 		clocks = <&clock_gcc clk_gcc_blsp1_ahb_clk>,
 			<&clock_gcc clk_gcc_blsp1_qup2_i2c_apps_clk>;
@@ -797,7 +797,7 @@
 		interrupt-names = "qup_irq";
 		interrupts = <0 97 0>;
 		qcom,clk-freq-out = <400000>;
-		qcom,clk-freq-in  = <19200000>;
+		qcom,clk-freq-in = <19200000>;
 		clock-names = "iface_clk", "core_clk";
 		clocks = <&clock_gcc clk_gcc_blsp1_ahb_clk>,
 			<&clock_gcc clk_gcc_blsp1_qup3_i2c_apps_clk>;
@@ -823,7 +823,7 @@
 		interrupt-names = "qup_irq";
 		interrupts = <0 299 0>;
 		qcom,clk-freq-out = <400000>;
-		qcom,clk-freq-in  = <19200000>;
+		qcom,clk-freq-in = <19200000>;
 		clock-names = "iface_clk", "core_clk";
 		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
 			<&clock_gcc clk_gcc_blsp2_qup1_i2c_apps_clk>;
@@ -907,8 +907,7 @@
 			< 320000000   3 >,  /* SVS       */
 			< 400000000   4 >,  /* SVS Plus  */
 			< 510000000   5 >,  /* NOM       */
-			< 560000000   6 >,  /* Nom Plus  */
-			< 800000000   7 >;  /* Turbo     */
+			< 800000000   6 >;  /* Turbo Obviously  */
 		#clock-cells = <1>;
 	};
 
@@ -970,12 +969,10 @@
 			<  652800000 1>,
 			< 1036800000 2>,
 			< 1401600000 3>,
-			< 1689600000 4>,
-			< 1843200000 5>,
-			< 1958400000 6>,
-			< 2016000000 7>,
-			< 2150400000 8>,
-			< 2208000000 9>;
+			< 1843200000 4>,
+			< 2016000000 5>,
+			< 2150400000 6>,
+			< 2208000000 7>;
 		qcom,speed7-bin-v0-cci =
 			<          0 0>,
 			<  261120000 1>,
@@ -1066,19 +1063,19 @@
 		cpubw-cpufreq {
 		target-dev = <&cpubw>;
 		cpu-to-dev-map =
-			 <  652800  1611>,
-			 < 1036800  3221>,
+			 <  652800   769>,
+			 < 1036800  2124>,
 			 < 1401600  5859>,
-			 < 1689600  6445>,
-			 < 1843200  7104>,
-			 < 1958400  7104>,
+			 < 1843200  6445>,
+			 < 2016000  6445>,
+			 < 2150400  7104>,
 			 < 2208000  7104>;
 		};
 
 		mincpubw-cpufreq {
 			target-dev = <&mincpubw>;
 			cpu-to-dev-map =
-				<  652800 1611 >,
+				<  652800 769  >,
 				< 1401600 5859 >,
 				< 2208000 7104 >;
 		};
