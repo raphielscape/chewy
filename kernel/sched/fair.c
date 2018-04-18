@@ -4756,7 +4756,7 @@ static void check_spread(struct cfs_rq *cfs_rq, struct sched_entity *se)
 }
 
 unsigned int Lgentle_fair_sleepers = 1;
-unsigned int Larch_power = 0;
+unsigned int Larch_power = 1;
 
 void relay_gfs(unsigned int gfs)
 {
