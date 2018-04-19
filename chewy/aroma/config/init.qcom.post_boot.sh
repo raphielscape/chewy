@@ -1161,9 +1161,6 @@ case "$target" in
                         ;;
                 esac
 
-                #scheduler settings
-                echo 3 > /proc/sys/kernel/sched_window_stats_policy
-                echo 3 > /proc/sys/kernel/sched_ravg_hist_size
                 #task packing settings
                 echo 0 > /sys/devices/system/cpu/cpu0/sched_static_cpu_pwr_cost
                 echo 0 > /sys/devices/system/cpu/cpu1/sched_static_cpu_pwr_cost
@@ -1173,13 +1170,6 @@ case "$target" in
                 echo 0 > /sys/devices/system/cpu/cpu5/sched_static_cpu_pwr_cost
                 echo 0 > /sys/devices/system/cpu/cpu6/sched_static_cpu_pwr_cost
                 echo 0 > /sys/devices/system/cpu/cpu7/sched_static_cpu_pwr_cost
-
-                #init task load, restrict wakeups to preferred cluster
-                echo 15 > /proc/sys/kernel/sched_init_task_load
-                # spill load is set to 100% by default in the kernel
-                echo 3 > /proc/sys/kernel/sched_spill_nr_run
-                # Apply inter-cluster load balancer restrictions
-                echo 1 > /proc/sys/kernel/sched_restrict_cluster_spill
 
                 # set sync wakee policy tunable
                 echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker
@@ -1331,11 +1321,6 @@ case "$target" in
 
                 # Enable low power modes
                 echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
-
-                # SMP scheduler
-                echo 85 > /proc/sys/kernel/sched_upmigrate
-                echo 85 > /proc/sys/kernel/sched_downmigrate
-                echo 19 > /proc/sys/kernel/sched_upmigrate_min_nice
 
                 # Enable sched guided freq control
                 echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_sched_load
@@ -2780,10 +2765,6 @@ case "$target" in
         setprop sys.post_boot.parsed 1
     ;;
     "msm8937" | "msm8953")
-        echo 128 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 128 > /sys/block/mmcblk0/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-0/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-1/queue/read_ahead_kb
         setprop sys.post_boot.parsed 1
         start gamed
     ;;
@@ -2797,15 +2778,6 @@ case "$target" in
     "apq8084")
         rm /data/system/perfd/default_values
         start mpdecision
-        echo 512 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 512 > /sys/block/sda/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdb/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdc/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdd/bdi/read_ahead_kb
-        echo 512 > /sys/block/sde/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdf/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdg/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdh/bdi/read_ahead_kb
     ;;
     "msm7627a")
         if [ -f /sys/devices/soc0/soc_id ]; then
