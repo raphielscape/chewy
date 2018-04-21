@@ -77,9 +77,6 @@ remove_line init.rc "    write /proc/sys/kernel/sched_child_runs_first 0"
 remove_line init.rc "    write /proc/sys/kernel/sched_rt_runtime_us 950000"
 remove_line init.rc "    write /proc/sys/kernel/sched_rt_period_us 1000000"
 
-remove_line init.rc "    write /proc/sys/vm/overcommit_memory 1"
-remove_line init.rc "    write /proc/sys/vm/min_free_order_shift 4"
-
 remove_line init.rc "    # Tweak background writeout"
 remove_line init.rc "    write /proc/sys/vm/dirty_expire_centisecs 200"
 remove_line init.rc "    write /proc/sys/vm/dirty_background_ratio  5"
