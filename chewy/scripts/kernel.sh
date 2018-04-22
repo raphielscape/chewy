@@ -56,7 +56,7 @@ if [[ -z "${JOBS}" ]]; then
 #    export JOBS=64;
 fi
 
-export MAKE="make O=${OUTDIR}";
+export MAKE="make O=${OUTDIR} CC=clang";
 check_toolchain;
 
 export TCVERSION1="$(${CROSS_COMPILE}gcc --version | head -1 |\
