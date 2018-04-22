@@ -40,10 +40,10 @@ export SUBARCH="arm64";
 export KBUILD_BUILD_USER="raphielscape";
 export KBUILD_BUILD_HOST="semaphorebox";
 
-export CLANG_PATH="$HOME/CLANG/bin";
+export CLANG_PATH="$HOME/CLANG/clang-4679922/bin";
 export PATH="${CLANG_PATH}:${PATH}";
 export CLANG_TRIPLE="aarch64-linux-gnu-";
-export CLANG_TCHAIN="$HOME/CLANG/bin/clang";
+export CLANG_TCHAIN="$HOME/CLANG/clang-4679922/bin/clang";
 export KBUILD_COMPILER_STRING="$(${CLANG_TCHAIN} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')";
 
 export TOOLCHAIN="${HOME}/GNU/GCC7/";
