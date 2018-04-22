@@ -37,8 +37,15 @@ export ANYKERNEL="${KERNELDIR}/chewy/aroma/anykernel/";
 export AROMA="${KERNELDIR}/chewy/aroma/";
 export ARCH="arm64";
 export SUBARCH="arm64";
-export KBUILD_BUILD_USER="raphielscape"
-export KBUILD_BUILD_HOST="semaphorebox"
+export KBUILD_BUILD_USER="raphielscape";
+export KBUILD_BUILD_HOST="semaphorebox";
+
+export CLANG_PATH="$HOME/CLANG/bin";
+export PATH="${CLANG_PATH}:${PATH}";
+export CLANG_TRIPLE="aarch64-linux-gnu-";
+export CLANG_TCHAIN="$HOME/CLANG/bin/clang";
+export KBUILD_COMPILER_STRING="$(${CLANG_TCHAIN} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')";
+
 export TOOLCHAIN="${HOME}/GNU/GCC7/";
 export DEFCONFIG="raph_defconfig";
 export ZIP_DIR="${KERNELDIR}/chewy/files/";
@@ -74,7 +81,7 @@ if [[ "$@" =~ "clean" ]]; then
 fi
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBAADNwADp8uuGBHV2tl40w7WAg"  -d chat_id=@raphiel_ci;
-curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel Treble from Raphiel started ;_;" -d chat_id=@raphiel_ci;
+curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel Clang from Raphiel started, except SIGSEGV ;_;" -d chat_id=@raphiel_ci;
 
 ${MAKE} $DEFCONFIG;
 START=$(date +"%s");
@@ -88,7 +95,7 @@ echo -e "Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.";
 
 if [[ ! -f "${IMAGE}" ]]; then
     echo -e "Build failed :P";
-    curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel Treble from Raphiel stopped unexpectedly, @raphielscape headsup re ;_;" -d chat_id=@raphiel_ci;
+    curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Semaphore CI build for Weeb Kernel Clang from Raphiel stopped unexpectedly as expected, @raphielscape headsup re ;_;" -d chat_id=@raphiel_ci;
     success=false;
     exit 1;
 else
