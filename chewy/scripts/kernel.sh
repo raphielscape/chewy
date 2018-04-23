@@ -7,28 +7,9 @@ source "scripts/random.sh";
 
 # Kernel compiling script
 
-function check_toolchain() {
-
-    export TC="$(find ${TOOLCHAIN}/bin -type f -name *-gcc)";
-
-	if [[ -f "${TC}" ]]; then
-		export CROSS_COMPILE="${TOOLCHAIN}/bin/$(echo ${TC} | awk -F '/' '{print $NF'} |\
-sed -e 's/gcc//')";
-		echo -e "Using toolchain: $(${CROSS_COMPILE}gcc --version | head -1)";
-	else
-		echo -e "No suitable toolchain found in ${TOOLCHAIN}";
-		exit 1;
-	fi
-}
-
 if [[ -z ${KERNELDIR} ]]; then
     echo -e "Please set KERNELDIR";
     exit 1;
-fi
-
-export DEVICE=$1;
-if [[ -z ${DEVICE} ]]; then
-    export DEVICE="mido";
 fi
 
 export SRCDIR="${KERNELDIR}/${DEVICE}";
@@ -46,7 +27,8 @@ export CLANG_TRIPLE="aarch64-linux-gnu-";
 export CLANG_TCHAIN="$HOME/CLANG/clang-4691093/bin/clang";
 export KBUILD_COMPILER_STRING="$(${CLANG_TCHAIN} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')";
 
-export TOOLCHAIN="${HOME}/GNU/GCC7/";
+export TCHAIN_PATH="$HOME/GNU/GCC7/bin/aarch64-linux-android-";
+export CROSS_COMPILE="${CCACHE} ${TCHAIN_PATH}";
 export DEFCONFIG="mido_defconfig";
 export ZIP_DIR="${KERNELDIR}/chewy/files/";
 export IMAGE="${OUTDIR}/arch/${ARCH}/boot/Image.gz-dtb";
