@@ -421,7 +421,7 @@ KBUILD_CPPFLAGS := -D__KERNEL__ $(CLANG_FLAGS)
 KBUILD_CFLAGS   := -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
-		   -Wno-format-security -Wno-sometimes-uninitialized \
+		   -Wno-format-security \
 		   -std=gnu89 $(CLANG_FLAGS)
 
 KBUILD_AFLAGS_KERNEL :=
@@ -641,7 +641,7 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS	+= -O2 -finline-functions -Wno-maybe-uninitialized
+KBUILD_CFLAGS	+= -O2 -finline-functions -Wno-sometimes-uninitialized -Wno-uninitialized -Wno-pointer-sign
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
