@@ -21,13 +21,10 @@ export SUBARCH="arm64";
 export KBUILD_BUILD_USER="raphielscape";
 export KBUILD_BUILD_HOST="semaphorebox";
 
-export CLANG_PATH="$HOME/CLANG/clang-4691093/bin";
 export PATH="${CLANG_PATH}:${PATH}";
 export CLANG_TRIPLE="aarch64-linux-gnu-";
-export CLANG_TCHAIN="$HOME/CLANG/clang-4691093/bin/clang";
 export KBUILD_COMPILER_STRING="$(${CLANG_TCHAIN} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')";
 
-export TCHAIN_PATH="$HOME/GNU/GCC7/bin/aarch64-linux-android-";
 export CROSS_COMPILE="${CCACHE} ${TCHAIN_PATH}";
 export DEFCONFIG="mido_defconfig";
 export ZIP_DIR="${KERNELDIR}/chewy/files/";
