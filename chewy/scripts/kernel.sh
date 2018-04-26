@@ -107,7 +107,7 @@ if [ -f "$FINAL_ZIP" ];
 then
 echo -e "$ZIPNAME zip can be found at $FINAL_ZIP";
 if [[ ${success} == true ]]; then
-    echo -e "Uploading ${ZIPNAME} to https://transfer.sh/";
+    echo -e "Uploading ${ZIPNAME} to Dropbox";
     transfer "${FINAL_ZIP}";
     ./chewy/scripts/deploy-tg.sh
 fi
