@@ -515,10 +515,10 @@
 		compatible = "qcom,msm-thermal";
 		qcom,sensor-id = <9>;
 		qcom,poll-ms = <2000>;
-		qcom,limit-temp = <75>;
+		qcom,limit-temp = <90>;
 		qcom,temp-hysteresis = <10>;
 		qcom,freq-step = <4>;
-		qcom,core-limit-temp = <80>;
+		qcom,core-limit-temp = <100>;
 		qcom,core-temp-hysteresis = <10>;
 		qcom,hotplug-temp = <105>;
 		qcom,hotplug-temp-hysteresis = <15>;
