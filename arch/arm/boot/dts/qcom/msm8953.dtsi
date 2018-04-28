@@ -517,14 +517,14 @@
 		qcom,poll-ms = <2000>;
 		qcom,limit-temp = <90>;
 		qcom,temp-hysteresis = <10>;
-		qcom,freq-step = <4>;
+		qcom,freq-step = <10>;
 		qcom,core-limit-temp = <100>;
 		qcom,core-temp-hysteresis = <10>;
 		qcom,hotplug-temp = <105>;
 		qcom,hotplug-temp-hysteresis = <15>;
 		qcom,freq-mitigation-temp = <105>;
 		qcom,freq-mitigation-temp-hysteresis = <15>;
-		qcom,freq-mitigation-value = <1843200>;
+		qcom,freq-mitigation-value = <2016000>;
 		qcom,freq-mitigation-control-mask = <0x00>;
 		qcom,therm-reset-temp = <115>;
 		qcom,online-hotplug-core;
@@ -572,7 +572,7 @@
 		qcom,ibat-monitor {
 			qcom,low-threshold-uamp = <3400000>;
 			qcom,high-threshold-uamp = <4200000>;
-			qcom,mitigation-freq-khz = <1689600>;
+			qcom,mitigation-freq-khz = <2016000>;
 			qcom,vph-high-threshold-uv = <3500000>;
 			qcom,vph-low-threshold-uv = <3200000>;
 			qcom,soc-low-threshold = <5>;
