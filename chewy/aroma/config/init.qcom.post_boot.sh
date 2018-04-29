@@ -31,7 +31,7 @@ target=`getprop ro.board.platform`
 
 function configure_zram_parameters() {
     # Zram disk - 512MB size
-    zram_enable=`getprop ro.vendor.qti.config.zram`
+    zram_enable=true
     if [ "$zram_enable" == "true" ]; then
         echo 536870912 > /sys/block/zram0/disksize
         mkswap /dev/block/zram0
