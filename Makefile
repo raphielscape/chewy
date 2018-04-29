@@ -626,6 +626,8 @@ else
 KBUILD_CFLAGS	+= -O3 $(call cc-disable-warning,maybe-uninitialized,)
 endif
 
+# Use PIPE for more faster compilation, Semaphore works on this tho
+KBUILD_CFLAGS	+= -pipe
 
 # Kill array bound warnings
 KBUILD_CFLAGS	+= $(call cc-disable-warning,array-bounds,)
