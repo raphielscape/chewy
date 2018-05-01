@@ -741,9 +741,6 @@ struct signal_struct {
 	short oom_score_adj;		/* OOM kill score adjustment */
 	short oom_score_adj_min;	/* OOM kill score adjustment min value.
 					 * Only settable by CAP_SYS_RESOURCE. */
-#ifdef CONFIG_ANDROID_LMK_ADJ_RBTREE
-	struct rb_node adj_node;
-#endif
 
 	struct mutex cred_guard_mutex;	/* guard against foreign influences on
 					 * credential calculations
@@ -1359,10 +1356,12 @@ struct sched_dl_entity {
 
 union rcu_special {
 	struct {
-		bool blocked;
-		bool need_qs;
-	} b;
-	short s;
+		u8 blocked;
+		u8 need_qs;
+		u8 exp_need_qs;
+		u8 pad;	/* Otherwise the compiler can store garbage here. */
+	} b; /* Bits. */
+	u32 s; /* Set of bits. */
 };
 struct rcu_node;
 
@@ -1436,9 +1435,9 @@ struct task_struct {
 	union rcu_special rcu_read_unlock_special;
 	struct list_head rcu_node_entry;
 #endif /* #ifdef CONFIG_PREEMPT_RCU */
-#ifdef CONFIG_TREE_PREEMPT_RCU
+#ifdef CONFIG_PREEMPT_RCU
 	struct rcu_node *rcu_blocked_node;
-#endif /* #ifdef CONFIG_TREE_PREEMPT_RCU */
+#endif /* #ifdef CONFIG_PREEMPT_RCU */
 #ifdef CONFIG_TASKS_RCU
 	unsigned long rcu_tasks_nvcsw;
 	bool rcu_tasks_holdout;
@@ -1451,9 +1450,6 @@ struct task_struct {
 #endif
 
 	struct list_head tasks;
-#ifdef CONFIG_ANDROID_LMK_ADJ_RBTREE
-       struct rb_node adj_node;
-#endif
 #ifdef CONFIG_SMP
 	struct plist_node pushable_tasks;
 	struct rb_node pushable_dl_tasks;
@@ -1894,14 +1890,6 @@ static inline struct pid *task_tgid(struct task_struct *task)
 {
 	return task->group_leader->pids[PIDTYPE_PID].pid;
 }
-
-#ifdef CONFIG_ANDROID_LMK_ADJ_RBTREE
-extern void add_2_adj_tree(struct task_struct *task);
-extern void delete_from_adj_tree(struct task_struct *task);
-#else
-static inline void add_2_adj_tree(struct task_struct *task) { }
-static inline void delete_from_adj_tree(struct task_struct *task) { }
-#endif
 
 /*
  * Without tasklist or rcu lock it is not safe to dereference
@@ -3006,7 +2994,7 @@ static inline int test_and_clear_tsk_thread_flag(struct task_struct *tsk, int fl
 
 static inline int test_tsk_thread_flag(struct task_struct *tsk, int flag)
 {
-	return test_ti_thread_flag(task_thread_info(tsk), flag);
+	return test_ti_thread_flag_relaxed(task_thread_info(tsk), flag);
 }
 
 static inline void set_tsk_need_resched(struct task_struct *tsk)

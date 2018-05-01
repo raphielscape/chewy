@@ -72,7 +72,6 @@ static void __unhash_process(struct task_struct *p, bool group_dead)
 		detach_pid(p, PIDTYPE_SID);
 
 		list_del_rcu(&p->tasks);
-		delete_from_adj_tree(p);
 		list_del_init(&p->sibling);
 		__this_cpu_dec(process_counts);
 	}
@@ -805,7 +804,9 @@ void do_exit(long code)
 	 */
 	flush_ptrace_hw_breakpoint(tsk);
 
+	TASKS_RCU(preempt_disable());
 	TASKS_RCU(tasks_rcu_i = __srcu_read_lock(&tasks_rcu_exit_srcu));
+	TASKS_RCU(preempt_enable());
 	exit_notify(tsk, group_dead);
 	proc_exit_connector(tsk);
 #ifdef CONFIG_NUMA

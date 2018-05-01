@@ -37,7 +37,7 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 	struct cs_dbs_tuners *cs_tuners = dbs_data->tuners;
 	struct cpufreq_policy *policy;
 	unsigned int sampling_rate;
-	unsigned int max_load = 0;
+	unsigned int max_load = 0, deferred_periods = UINT_MAX;
 	unsigned int ignore_nice;
 	unsigned int j;
 
@@ -139,7 +139,12 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 		 */
 		if (unlikely(wall_time > (2 * sampling_rate) &&
 			     j_cdbs->prev_load)) {
+			unsigned int periods = wall_time / sampling_rate;
+
 			load = j_cdbs->prev_load;
+
+			if (periods < deferred_periods)
+				deferred_periods = periods;
 
 			/*
 			 * Perform a destructive copy, to ensure that we copy
@@ -156,6 +161,7 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 			max_load = load;
 	}
 
+	cdbs->deferred_periods = deferred_periods;
 	dbs_data->cdata->gov_check_cpu(cpu, max_load);
 }
 EXPORT_SYMBOL_GPL(dbs_check_cpu);
@@ -304,10 +310,8 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			latency = 1;
 
 		/* Bring kernel and HW constraints together */
-		dbs_data->min_sampling_rate = max(dbs_data->min_sampling_rate,
-				MIN_LATENCY_MULTIPLIER * latency);
-		set_sampling_rate(dbs_data, max(dbs_data->min_sampling_rate,
-					latency * LATENCY_MULTIPLIER));
+		set_sampling_rate(dbs_data,
+			max((int)(LATENCY_MULTIPLIER * latency), 10000));
 
 		if ((cdata->governor == GOV_CONSERVATIVE) &&
 				(!policy->governor->initialized)) {

@@ -31,7 +31,7 @@ target=`getprop ro.board.platform`
 
 function configure_zram_parameters() {
     # Zram disk - 512MB size
-    zram_enable=`getprop ro.vendor.qti.config.zram`
+    zram_enable=true
     if [ "$zram_enable" == "true" ]; then
         echo 536870912 > /sys/block/zram0/disksize
         mkswap /dev/block/zram0
@@ -1161,29 +1161,6 @@ case "$target" in
                         ;;
                 esac
 
-                #scheduler settings
-                echo 3 > /proc/sys/kernel/sched_window_stats_policy
-                echo 3 > /proc/sys/kernel/sched_ravg_hist_size
-                #task packing settings
-                echo 0 > /sys/devices/system/cpu/cpu0/sched_static_cpu_pwr_cost
-                echo 0 > /sys/devices/system/cpu/cpu1/sched_static_cpu_pwr_cost
-                echo 0 > /sys/devices/system/cpu/cpu2/sched_static_cpu_pwr_cost
-                echo 0 > /sys/devices/system/cpu/cpu3/sched_static_cpu_pwr_cost
-                echo 0 > /sys/devices/system/cpu/cpu4/sched_static_cpu_pwr_cost
-                echo 0 > /sys/devices/system/cpu/cpu5/sched_static_cpu_pwr_cost
-                echo 0 > /sys/devices/system/cpu/cpu6/sched_static_cpu_pwr_cost
-                echo 0 > /sys/devices/system/cpu/cpu7/sched_static_cpu_pwr_cost
-
-                #init task load, restrict wakeups to preferred cluster
-                echo 15 > /proc/sys/kernel/sched_init_task_load
-                # spill load is set to 100% by default in the kernel
-                echo 3 > /proc/sys/kernel/sched_spill_nr_run
-                # Apply inter-cluster load balancer restrictions
-                echo 1 > /proc/sys/kernel/sched_restrict_cluster_spill
-
-                # set sync wakee policy tunable
-                echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker
-
                 for devfreq_gov in /sys/class/devfreq/qcom,mincpubw*/governor
                 do
                     echo "cpufreq" > $devfreq_gov
@@ -1299,7 +1276,6 @@ case "$target" in
                 echo "37 400000:2 600000:64 800000:38 1000000:52 1200000:78 1400000:71 1600000:95 1800000:94" > /sys/devices/system/cpu/cpufreq/interactive/target_loads
                 echo 19000 > /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
                 echo 0 > /sys/devices/system/cpu/cpufreq/interactive/sampling_down_factor
-                echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
                 # re-enable thermal & BCL core_control now
                 echo 1 > /sys/module/msm_thermal/core_control/enabled
@@ -1332,16 +1308,9 @@ case "$target" in
                 # Enable low power modes
                 echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
 
-                # SMP scheduler
-                echo 85 > /proc/sys/kernel/sched_upmigrate
-                echo 85 > /proc/sys/kernel/sched_downmigrate
-                echo 19 > /proc/sys/kernel/sched_upmigrate_min_nice
-
                 # Enable sched guided freq control
                 echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_sched_load
                 echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_migration_notif
-                echo 200000 > /proc/sys/kernel/sched_freq_inc_notify
-                echo 200000 > /proc/sys/kernel/sched_freq_dec_notify
 
                 # Set Memory parameters
                 configure_memory_parameters
@@ -2780,10 +2749,6 @@ case "$target" in
         setprop sys.post_boot.parsed 1
     ;;
     "msm8937" | "msm8953")
-        echo 128 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 128 > /sys/block/mmcblk0/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-0/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-1/queue/read_ahead_kb
         setprop sys.post_boot.parsed 1
         start gamed
     ;;
@@ -2797,15 +2762,6 @@ case "$target" in
     "apq8084")
         rm /data/system/perfd/default_values
         start mpdecision
-        echo 512 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 512 > /sys/block/sda/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdb/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdc/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdd/bdi/read_ahead_kb
-        echo 512 > /sys/block/sde/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdf/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdg/bdi/read_ahead_kb
-        echo 512 > /sys/block/sdh/bdi/read_ahead_kb
     ;;
     "msm7627a")
         if [ -f /sys/devices/soc0/soc_id ]; then

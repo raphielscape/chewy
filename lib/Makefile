@@ -1,6 +1,13 @@
 #
 # Makefile for some libs needed in the kernel.
 #
+CFLAGS_libcrc32c.o := -fno-strict-aliasing
+CFLAGS_nlattr.o := -fno-strict-aliasing
+CFLAGS_klist.o := -fno-strict-aliasing
+CFLAGS_kobject_uevent.o := -fno-strict-aliasing
+CFLAGS_radix-tree.o := -fno-strict-aliasing
+CFLAGS_vsprintf.o := -fno-strict-aliasing
+CFLAGS_dynamic_debug.o := -fno-strict-aliasing
 
 ifdef CONFIG_FUNCTION_TRACER
 ORIG_CFLAGS := $(KBUILD_CFLAGS)
@@ -20,7 +27,7 @@ KCOV_INSTRUMENT_dynamic_debug.o := n
 KCOV_INSTRUMENT_hweight.o := n
 
 lib-y := ctype.o string.o vsprintf.o cmdline.o \
-	 rbtree.o radix-tree.o dump_stack.o timerqueue.o\
+	 rbtree.o radix-tree.o sradix-tree.o dump_stack.o timerqueue.o\
 	 idr.o int_sqrt.o extable.o \
 	 sha1.o chacha20.o md5.o irq_regs.o argv_split.o \
 	 proportions.o flex_proportions.o ratelimit.o show_mem.o \
@@ -41,7 +48,8 @@ obj-y += bcd.o div64.o sort.o parser.o halfmd4.o debug_locks.o random32.o \
 	 bust_spinlocks.o hexdump.o kasprintf.o bitmap.o scatterlist.o \
 	 gcd.o lcm.o list_sort.o uuid.o flex_array.o iovec.o clz_ctz.o \
 	 bsearch.o find_last_bit.o find_next_bit.o llist.o memweight.o kfifo.o \
-	 percpu-refcount.o percpu_ida.o hash.o rhashtable.o reciprocal_div.o
+	 percpu-refcount.o percpu_ida.o hash.o rhashtable.o reciprocal_div.o \
+	 once.o
 obj-y += string_helpers.o
 obj-$(CONFIG_TEST_STRING_HELPERS) += test-string_helpers.o
 obj-y += kstrtox.o

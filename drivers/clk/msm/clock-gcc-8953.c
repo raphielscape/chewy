@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -387,6 +387,7 @@ static struct clk_freq_tbl ftbl_gfx3d_clk_src[] = {
 	F_MM( 510000000,    1020000000,               gpll3,    1,    0,     0),
 	F_MM( 560000000,    1120000000,               gpll3,    1,    0,     0),
 	F_MM( 650000000,    1300000000,               gpll3,    1,    0,     0),
+	F_MM( 700000000,    1400000000,               gpll3,    1,    0,     0),
 
 	F_END
 };
@@ -1177,6 +1178,7 @@ static struct rcg_clk camss_gp1_clk_src = {
 };
 
 static struct clk_freq_tbl ftbl_mclk0_clk_src[] = {
+	F(  12000000, gpll6_main_div2,    1,    2,    90),
 #ifdef CONFIG_MACH_XIAOMI_MIDO
 	F(  19200000,              xo,    1,    0,     0),
 #endif
@@ -1202,6 +1204,7 @@ static struct rcg_clk mclk0_clk_src = {
 };
 
 static struct clk_freq_tbl ftbl_mclk1_clk_src[] = {
+	F(  12000000, gpll6_main_div2,    1,    2,    90),
 	F(  24000000, gpll6_main_div2,    1,    2,    45),
 	F(  33330000, gpll0_main_div2,   12,    0,     0),
 	F(  36610000, gpll6,		  1,    2,    59),
@@ -1224,6 +1227,7 @@ static struct rcg_clk mclk1_clk_src = {
 };
 
 static struct clk_freq_tbl ftbl_mclk2_clk_src[] = {
+	F(  12000000, gpll6_main_div2,    1,    2,    90),
 	F(  24000000, gpll6_main_div2,    1,    2,    45),
 	F(  33330000, gpll0_main_div2,   12,    0,     0),
 	F(  36610000, gpll6,		  1,    2,    59),
@@ -1246,6 +1250,7 @@ static struct rcg_clk mclk2_clk_src = {
 };
 
 static struct clk_freq_tbl ftbl_mclk3_clk_src[] = {
+	F(  12000000, gpll6_main_div2,    1,    2,    90),
 	F(  24000000, gpll6_main_div2,    1,    2,    45),
 	F(  33330000, gpll0_main_div2,   12,    0,     0),
 	F(  36610000, gpll6,		  1,    2,    59),

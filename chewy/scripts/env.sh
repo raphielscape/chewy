@@ -27,7 +27,7 @@ nc='\e[0m'
 
 function transfer() {
 	zipname="$(echo $1 | awk -F '/' '{print $NF}')";
-	url="$(curl -# -T $1 https://transfer.sh)";
+	url="$(bash $KERNELDIR/chewy/scripts/dropbox_uploader.sh upload $1 /megalovania)";
 	printf '\n';
 	echo -e "Download ${zipname} at ${url}";
 }

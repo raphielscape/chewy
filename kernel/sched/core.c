@@ -92,6 +92,8 @@
 #include "sched.h"
 #include "../workqueue_internal.h"
 #include "../smpboot.h"
+#include <asm-generic/relaxed.h>
+#include <asm-generic/processor.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
@@ -841,6 +843,23 @@ static inline bool got_nohz_idle_kick(void)
 #ifdef CONFIG_NO_HZ_FULL
 bool sched_can_stop_tick(void)
 {
+	/*
+	 * FIFO realtime policy runs the highest priority task. Other runnable
+	 * tasks are of a lower priority. The scheduler tick does nothing.
+	 */
+	if (current->policy == SCHED_FIFO)
+		return true;
+
+	/*
+	 * Round-robin realtime tasks time slice with other tasks at the same
+	 * realtime priority. Is this task the only one at this priority?
+	 */
+	if (current->policy == SCHED_RR) {
+		struct sched_rt_entity *rt_se = &current->rt;
+
+		return rt_se->run_list.prev == rt_se->run_list.next;
+	}
+
 	/*
 	 * More than one running task need preemption.
 	 * nr_running update is assumed to be visible
@@ -1844,7 +1863,15 @@ min_max_possible_capacity = 1024; /* min(rq->max_possible_capacity) */
 __read_mostly unsigned int sched_ravg_window = 10000000;
 
 /* Min window size (in ns) = 10ms */
+#ifdef CONFIG_HZ_300
+/*
+ * Tick interval becomes to 3333333 due to
+ * rounding error when HZ=300.
+ */
+#define MIN_SCHED_RAVG_WINDOW (3333333 * 6)
+#else
 #define MIN_SCHED_RAVG_WINDOW 10000000
+#endif
 
 /* Max window size (in ns) = 1s */
 #define MAX_SCHED_RAVG_WINDOW 1000000000
@@ -1852,13 +1879,7 @@ __read_mostly unsigned int sched_ravg_window = 10000000;
 /* Temporarily disable window-stats activity on all cpus */
 unsigned int __read_mostly sched_disable_window_stats;
 
-/*
- * Major task runtime. If a task runs for more than sched_major_task_runtime
- * in a window, it's considered to be generating majority of workload
- * for this window. Prediction could be adjusted for such tasks.
- */
 #ifdef CONFIG_SCHED_FREQ_INPUT
-__read_mostly unsigned int sched_major_task_runtime = 10000000;
 
 /*
  * Demand aggregation for frequency purpose:
@@ -2232,8 +2253,6 @@ scale_load_to_freq(u64 load, unsigned int src_freq, unsigned int dst_freq)
 	return div64_u64(load * (u64)src_freq, (u64)dst_freq);
 }
 
-#define HEAVY_TASK_SKIP 2
-#define HEAVY_TASK_SKIP_LIMIT 4
 /*
  * get_pred_busy - calculate predicted demand for a task on runqueue
  *
@@ -2261,7 +2280,7 @@ static u32 get_pred_busy(struct rq *rq, struct task_struct *p,
 	u32 *hist = p->ravg.sum_history;
 	u32 dmin, dmax;
 	u64 cur_freq_runtime = 0;
-	int first = NUM_BUSY_BUCKETS, final, skip_to;
+	int first = NUM_BUSY_BUCKETS, final;
 	u32 ret = runtime;
 
 	/* skip prediction for new tasks due to lack of history */
@@ -2281,36 +2300,6 @@ static u32 get_pred_busy(struct rq *rq, struct task_struct *p,
 
 	/* compute the bucket for prediction */
 	final = first;
-	if (first < HEAVY_TASK_SKIP_LIMIT) {
-		/* compute runtime at current CPU frequency */
-		cur_freq_runtime = mult_frac(runtime, max_possible_efficiency,
-					     rq->cluster->efficiency);
-		cur_freq_runtime = scale_load_to_freq(cur_freq_runtime,
-				max_possible_freq, rq->cluster->cur_freq);
-		/*
-		 * if the task runs for majority of the window, try to
-		 * pick higher buckets.
-		 */
-		if (cur_freq_runtime >= sched_major_task_runtime) {
-			int next = NUM_BUSY_BUCKETS;
-			/*
-			 * if there is a higher bucket that's consistently
-			 * hit, don't jump beyond that.
-			 */
-			for (i = start + 1; i <= HEAVY_TASK_SKIP_LIMIT &&
-			     i < NUM_BUSY_BUCKETS; i++) {
-				if (buckets[i] > CONSISTENT_THRES) {
-					next = i;
-					break;
-				}
-			}
-			skip_to = min(next, start + HEAVY_TASK_SKIP);
-			/* don't jump beyond HEAVY_TASK_SKIP_LIMIT */
-			skip_to = min(HEAVY_TASK_SKIP_LIMIT, skip_to);
-			/* don't go below first non-empty bucket, if any */
-			final = max(first, skip_to);
-		}
-	}
 
 	/* determine demand range for the predicted bucket */
 	if (final < 2) {
@@ -4985,7 +4974,7 @@ void scheduler_ipi(void)
 	 */
 	preempt_fold_need_resched();
 
-	if (llist_empty(&this_rq()->wake_list) && !got_nohz_idle_kick() &&
+	if (llist_empty_relaxed(&this_rq()->wake_list) && !got_nohz_idle_kick() &&
 							!got_boost_kick())
 		return;
 
@@ -5556,8 +5545,8 @@ unsigned long to_ratio(u64 period, u64 runtime)
 #ifdef CONFIG_SMP
 inline struct dl_bw *dl_bw_of(int i)
 {
-	rcu_lockdep_assert(rcu_read_lock_sched_held(),
-			   "sched RCU must be held");
+	RCU_LOCKDEP_WARN(!rcu_read_lock_sched_held(),
+			 "sched RCU must be held");
 	return &cpu_rq(i)->rd->dl_bw;
 }
 
@@ -5566,8 +5555,8 @@ static inline int dl_bw_cpus(int i)
 	struct root_domain *rd = cpu_rq(i)->rd;
 	int cpus = 0;
 
-	rcu_lockdep_assert(rcu_read_lock_sched_held(),
-			   "sched RCU must be held");
+	RCU_LOCKDEP_WARN(!rcu_read_lock_sched_held(),
+			 "sched RCU must be held");
 	for_each_cpu_and(i, rd->span, cpu_active_mask)
 		cpus++;
 
@@ -6416,7 +6405,6 @@ need_resched:
 	preempt_disable();
 	cpu = smp_processor_id();
 	rq = cpu_rq(cpu);
-	rcu_note_context_switch(cpu);
 	prev = rq->curr;
 
 	schedule_debug(prev);
@@ -6424,13 +6412,16 @@ need_resched:
 	if (sched_feat(HRTICK))
 		hrtick_clear(rq);
 
+	local_irq_disable();
+	rcu_note_context_switch();
+
 	/*
 	 * Make sure that signal_pending_state()->signal_pending() below
 	 * can't be reordered with __set_current_state(TASK_INTERRUPTIBLE)
 	 * done by the caller to avoid the race with signal_wake_up().
 	 */
 	smp_mb__before_spinlock();
-	raw_spin_lock_irq(&rq->lock);
+	raw_spin_lock(&rq->lock);
 
 	switch_count = &prev->nivcsw;
 	if (prev->state && !(preempt_count() & PREEMPT_ACTIVE)) {
@@ -6889,7 +6880,7 @@ int idle_cpu(int cpu)
 		return 0;
 
 #ifdef CONFIG_SMP
-	if (!llist_empty(&rq->wake_list))
+	if (!llist_empty_relaxed(&rq->wake_list))
 		return 0;
 #endif
 
@@ -7067,6 +7058,20 @@ static bool check_same_owner(struct task_struct *p)
 	return match;
 }
 
+static bool dl_param_changed(struct task_struct *p,
+		const struct sched_attr *attr)
+{
+	struct sched_dl_entity *dl_se = &p->dl;
+
+	if (dl_se->dl_runtime != attr->sched_runtime ||
+		dl_se->dl_deadline != attr->sched_deadline ||
+		dl_se->dl_period != attr->sched_period ||
+		dl_se->flags != attr->sched_flags)
+		return true;
+
+	return false;
+}
+
 static int __sched_setscheduler(struct task_struct *p,
 				const struct sched_attr *attr,
 				bool user)
@@ -7196,7 +7201,7 @@ recheck:
 			goto change;
 		if (rt_policy(policy) && attr->sched_priority != p->rt_priority)
 			goto change;
-		if (dl_policy(policy))
+		if (dl_policy(policy) && dl_param_changed(p, attr))
 			goto change;
 
 		p->sched_reset_on_fork = reset_on_fork;
@@ -8195,17 +8200,8 @@ void sched_show_task(struct task_struct *p)
 	state = p->state ? __ffs(p->state) + 1 : 0;
 	printk(KERN_INFO "%-15.15s %c", p->comm,
 		state < sizeof(stat_nam) - 1 ? stat_nam[state] : '?');
-#if BITS_PER_LONG == 32
-	if (state == TASK_RUNNING)
-		printk(KERN_CONT " running  ");
-	else
-		printk(KERN_CONT " %08lx ", thread_saved_pc(p));
-#else
 	if (state == TASK_RUNNING)
 		printk(KERN_CONT "  running task    ");
-	else
-		printk(KERN_CONT " %016lx ", thread_saved_pc(p));
-#endif
 #ifdef CONFIG_DEBUG_STACK_USAGE
 	free = stack_not_used(p);
 #endif
@@ -9305,7 +9301,7 @@ static int init_rootdomain(struct root_domain *rd)
 
 	init_dl_bw(&rd->dl_bw);
 	if (cpudl_init(&rd->cpudl) != 0)
-		goto free_dlo_mask;
+		goto free_rto_mask;
 
 	if (cpupri_init(&rd->cpupri) != 0)
 		goto free_rto_mask;

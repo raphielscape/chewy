@@ -1,6 +1,8 @@
 #
 # Arch-specific CryptoAPI modules.
 #
+CFLAGS_KERNEL := -fno-strict-aliasing
+
 
 obj-$(CONFIG_CRYPTO_AES_ARM) += aes-arm.o
 obj-$(CONFIG_CRYPTO_AES_ARM_BS) += aes-arm-bs.o
@@ -22,6 +24,8 @@ sha256-arm-y	:= sha256-core.o sha256_glue.o $(sha256-arm-neon-y)
 sha512-arm-neon-y := sha512-armv7-neon.o sha512_neon_glue.o
 aes-arm-ce-y	:= aes-ce-core.o aes-ce-glue.o
 speck-neon-y := speck-neon-core.o speck-neon-glue.o
+
+ccflags-y := -O3
 
 quiet_cmd_perl = PERL    $@
       cmd_perl = $(PERL) $(<) > $(@)

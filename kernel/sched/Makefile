@@ -2,13 +2,15 @@ ifdef CONFIG_FUNCTION_TRACER
 CFLAGS_REMOVE_clock.o = -pg
 endif
 
+CFLAGS_bfs.o := -fno-strict-aliasing
+
 ifneq ($(CONFIG_SCHED_OMIT_FRAME_POINTER),y)
 # According to Alan Modra <alan@linuxcare.com.au>, the -fno-omit-frame-pointer is
 # needed for x86 only.  Why this used to be enabled for all architectures is beyond
 # me.  I suspect most platforms don't need this, but until we know that for sure
 # I turn this off for IA-64 only.  Andreas Schwab says it's also needed on m68k
 # to get a correct value for the wait-channel (WCHAN in ps). --davidm
-CFLAGS_core.o := $(PROFILING) -fno-omit-frame-pointer
+CFLAGS_core.o := $(PROFILING) -fno-omit-frame-pointer -fno-strict-aliasing
 endif
 
 ifdef CONFIG_SCHED_QHMP

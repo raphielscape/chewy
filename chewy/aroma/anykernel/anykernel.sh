@@ -37,7 +37,7 @@ dump_boot;
 
 # begin ramdisk changes
 
-# add inferno initialization script
+# add raphielscape initialization script
 insert_line init.rc "import /init.spectrum.rc" after "import /init.trace.rc" "import /init.spectrum.rc";
 cp -rpf $patch/thermal-engine.conf /system/etc/thermal-engine.conf
 
@@ -64,6 +64,22 @@ remove_line init.qcom.rc "    write /proc/sys/net/ipv6/conf/rmnet_usb0/accept_ra
 remove_line init.qcom.rc "    write /proc/sys/net/ipv6/conf/rmnet_usb1/accept_ra 2"
 remove_line init.qcom.rc "    write /proc/sys/net/ipv6/conf/rmnet_usb2/accept_ra 2"
 remove_line init.qcom.rc "    write /proc/sys/net/ipv6/conf/rmnet_usb3/accept_ra 2"
+#remove conflicting scheduler tuningscape
+remove_line init.rc "    # scheduler tunables"
+remove_line init.rc "    # Disable auto-scaling of scheduler tunables with hotplug. The tunables"
+remove_line init.rc "    # will vary across devices in unpredictable ways if allowed to scale with"
+remove_line init.rc "    # cpu cores."
+remove_line init.rc "    write /proc/sys/kernel/sched_tunable_scaling 0"
+remove_line init.rc "    write /proc/sys/kernel/sched_latency_ns 10000000"
+remove_line init.rc "    write /proc/sys/kernel/sched_wakeup_granularity_ns 2000000"
+remove_line init.rc "    write /proc/sys/kernel/sched_child_runs_first 0"
+
+remove_line init.rc "    write /proc/sys/kernel/sched_rt_runtime_us 950000"
+remove_line init.rc "    write /proc/sys/kernel/sched_rt_period_us 1000000"
+
+remove_line init.rc "    # Tweak background writeout"
+remove_line init.rc "    write /proc/sys/vm/dirty_expire_centisecs 200"
+remove_line init.rc "    write /proc/sys/vm/dirty_background_ratio  5"
 
 # end ramdisk changes
 

@@ -44,7 +44,6 @@ enum {
 enum flat_binder_object_shifts {
 	FLAT_BINDER_FLAG_SCHED_POLICY_SHIFT = 9,
 };
-
 /**
  * enum flat_binder_object_flags - flags for use in flat_binder_object.flags
  */
@@ -78,7 +77,6 @@ enum flat_binder_object_flags {
 	 */
 	FLAT_BINDER_FLAG_SCHED_POLICY_MASK =
 		3U << FLAT_BINDER_FLAG_SCHED_POLICY_SHIFT,
-
 	/**
 	 * @FLAT_BINDER_FLAG_INHERIT_RT: whether the node inherits RT policy
 	 *
@@ -86,6 +84,21 @@ enum flat_binder_object_flags {
 	 * scheduling policy from the caller (for synchronous transactions).
 	 */
 	FLAT_BINDER_FLAG_INHERIT_RT = 0x800,
+
+	/**
+	 * @FLAT_BINDER_FLAG_THREAD: must be set for flat_binder_object_thread
+	 *
+	 */
+	FLAT_BINDER_FLAG_THREAD = 0x1000,
+
+	/**
+	 * @FLAT_BINDER_FLAG_ASYNC_ONLY: dedicated thread for async only
+	 *
+	 * When set, only asynchronous transactions into a node are handled by
+	 * its dedicated thread.
+	 *
+	 */
+	FLAT_BINDER_FLAG_THREAD_ASYNC_ONLY = 0x2000,
 };
 
 #ifdef BINDER_IPC_32BIT
@@ -123,6 +136,27 @@ struct flat_binder_object {
 
 	/* extra data associated with local object */
 	binder_uintptr_t	cookie;
+};
+
+/**
+ * struct flat_binder_object_thread - flat_binder_object with associated thread
+ * @fb:		flat_binder_object describing the binder object
+ * @thread:     pid of thread to handle transactions into this node; if this
+ *              field is '0', it means no thread should be associated with
+ *              the node.
+ *
+ * The binder driver has added support for linking a node to a thread, which
+ * ensures that all (a)synchronous transactions into that node are handled on
+ * this thread. If userspace wants this behavior, it has to pass this object
+ * into the kernel, and fb->flags must have @FLAT_BINDER_FLAG_THREAD set.
+ *
+ * Note that the thread argument is only used for nodes, eg for
+ * @BINDER_TYPE_BINDER and @BINDER_TYPE_WEAK_BINDER.
+ */
+struct flat_binder_object_thread {
+	struct flat_binder_object       fb;
+	/* pid of thread for handling transactions into this node */
+	pid_t thread;
 };
 
 /**
@@ -178,7 +212,6 @@ enum {
 
 /* struct binder_fd_array_object - object describing an array of fds in a buffer
  * @hdr:		common header structure
- * @pad:		padding to ensure correct alignment
  * @num_fds:		number of file descriptors in the buffer
  * @parent:		index in offset array to buffer holding the fd array
  * @parent_offset:	start offset of fd array in the buffer
@@ -199,7 +232,6 @@ enum {
  */
 struct binder_fd_array_object {
 	struct binder_object_header	hdr;
-	__u32				pad;
 	binder_size_t			num_fds;
 	binder_size_t			parent;
 	binder_size_t			parent_offset;

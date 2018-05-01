@@ -548,8 +548,25 @@ static int cpufreq_parse_governor(char *str_governor, unsigned int *policy,
 			ret = request_module("cpufreq_%s", str_governor);
 			mutex_lock(&cpufreq_governor_mutex);
 
+			/*
+			 * At this point, if the governor was found via module
+			 * search, it will load it. However, if it didn't, we
+			 * are just going to exit without doing anything to
+			 * the governor. Most of the time, this is totally
+			 * fine; the one scenario where it's not is when a ROM
+			 * has a boot script that requests a governor that
+			 * exists in the default kernel but not in this one.
+			 * This kernel (and nearly every other Android kernel)
+			 * has the performance governor as default for boot
+			 * performance which is then changed to another,
+			 * usually interactive. So, instead of just exiting if
+			 * the requested governor wasn't found, let's try
+			 * falling back to interactive before falling out.
+			 */
 			if (ret == 0)
 				t = __find_governor(str_governor);
+			else
+				t = __find_governor("interactive");
 		}
 
 		if (t != NULL) {
@@ -583,6 +600,7 @@ show_one(cpuinfo_max_freq, cpuinfo.max_freq);
 show_one(cpuinfo_transition_latency, cpuinfo.transition_latency);
 show_one(scaling_min_freq, min);
 show_one(scaling_max_freq, max);
+show_one(cpu_utilization, util);
 
 static ssize_t show_scaling_cur_freq(
 	struct cpufreq_policy *policy, char *buf)
@@ -815,6 +833,7 @@ cpufreq_freq_attr_ro(scaling_cur_freq);
 cpufreq_freq_attr_ro(bios_limit);
 cpufreq_freq_attr_ro(related_cpus);
 cpufreq_freq_attr_ro(affected_cpus);
+cpufreq_freq_attr_ro(cpu_utilization);
 cpufreq_freq_attr_rw(scaling_min_freq);
 cpufreq_freq_attr_rw(scaling_max_freq);
 cpufreq_freq_attr_rw(scaling_governor);
@@ -827,6 +846,7 @@ static struct attribute *default_attrs[] = {
 	&scaling_min_freq.attr,
 	&scaling_max_freq.attr,
 	&affected_cpus.attr,
+	&cpu_utilization.attr,
 	&related_cpus.attr,
 	&scaling_governor.attr,
 	&scaling_driver.attr,
@@ -1173,7 +1193,7 @@ static void cpufreq_policy_put_kobj(struct cpufreq_policy *policy)
 	 * proceed with unloading.
 	 */
 	pr_debug("waiting for dropping of refcount\n");
-	wait_for_completion(cmp);
+	wait_for_completion_interruptible(cmp);
 	pr_debug("wait complete\n");
 }
 
@@ -1304,6 +1324,9 @@ static int __cpufreq_add_dev(struct device *dev, struct subsys_interface *sif)
 	if (!recover_policy) {
 		policy->user_policy.min = policy->min;
 		policy->user_policy.max = policy->max;
+	} else {
+		policy->min = policy->user_policy.min;
+		policy->max = policy->user_policy.max;
 	}
 
 	down_write(&policy->rwsem);
@@ -1879,6 +1902,23 @@ void *cpufreq_get_driver_data(void)
 }
 EXPORT_SYMBOL_GPL(cpufreq_get_driver_data);
 
+/**
+ * cpufreq_notify_utilization - notify CPU userspace about CPU utilization
+ * change
+ *
+ * This function is called everytime the CPU load is evaluated by the
+ * ondemand governor. It notifies userspace of cpu load changes via sysfs.
+ */
+void cpufreq_notify_utilization(struct cpufreq_policy *policy,
+		unsigned int util)
+{
+	if (policy)
+		policy->util = util;
+
+	if (policy->util >= MIN_CPU_UTIL_NOTIFY)
+		sysfs_notify(&policy->kobj, NULL, "cpu_utilization");
+
+}
 /*********************************************************************
  *                     NOTIFIER LISTS INTERFACE                      *
  *********************************************************************/
@@ -2633,23 +2673,13 @@ int cpufreq_register_driver(struct cpufreq_driver *driver_data)
 	if (ret)
 		goto err_boost_unreg;
 
-	if (!(cpufreq_driver->flags & CPUFREQ_STICKY)) {
-		int i;
-		ret = -ENODEV;
-
-		/* check for at least one working CPU */
-		for (i = 0; i < nr_cpu_ids; i++)
-			if (cpu_possible(i) && per_cpu(cpufreq_cpu_data, i)) {
-				ret = 0;
-				break;
-			}
-
+	if (!(cpufreq_driver->flags & CPUFREQ_STICKY) &&
+	    list_empty(&cpufreq_policy_list)) {
 		/* if all ->init() calls failed, unregister */
-		if (ret) {
-			pr_debug("no CPU initialized for driver %s\n",
-				 driver_data->name);
-			goto err_if_unreg;
-		}
+		ret = -ENODEV;
+		pr_debug("%s: No CPU initialized for driver %s\n", __func__,
+			 driver_data->name);
+		goto err_if_unreg;
 	}
 
 	pr_info("driver %s up and running\n", driver_data->name);

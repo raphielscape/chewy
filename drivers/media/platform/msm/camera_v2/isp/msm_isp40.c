@@ -232,8 +232,8 @@ static int32_t msm_vfe40_init_qos_parms(struct vfe_device *vfe_dev,
 					for (i = 0; i < ds_entries; i++)
 						msm_camera_io_w(ds_settings[i],
 							vfebase + ds_regs[i]);
-						kfree(ds_regs);
-						kfree(ds_settings);
+					kfree(ds_regs);
+					kfree(ds_settings);
 				}
 			} else {
 				kfree(ds_regs);
@@ -1053,15 +1053,18 @@ static int msm_vfe40_start_fetch_engine(struct vfe_device *vfe_dev,
 				fe_cfg->stream_id);
 		vfe_dev->fetch_engine_info.bufq_handle = bufq_handle;
 
+		mutex_lock(&vfe_dev->buf_mgr->lock);
 		rc = vfe_dev->buf_mgr->ops->get_buf_by_index(
 			vfe_dev->buf_mgr, bufq_handle, fe_cfg->buf_idx, &buf);
 		if (rc < 0 || !buf) {
 			pr_err("%s: No fetch buffer rc= %d\n",
 				__func__, rc);
+			mutex_unlock(&vfe_dev->buf_mgr->lock);
 			return -EINVAL;
 		}
 		mapped_info = buf->mapped_info[0];
 		buf->state = MSM_ISP_BUFFER_STATE_DISPATCHED;
+		mutex_unlock(&vfe_dev->buf_mgr->lock);
 	} else {
 		rc = vfe_dev->buf_mgr->ops->map_buf(vfe_dev->buf_mgr,
 			&mapped_info, fe_cfg->fd);
@@ -1113,14 +1116,15 @@ static int msm_vfe40_start_fetch_engine_multi_pass(struct vfe_device *vfe_dev,
 		mutex_lock(&vfe_dev->buf_mgr->lock);
 		rc = vfe_dev->buf_mgr->ops->get_buf_by_index(
 			vfe_dev->buf_mgr, bufq_handle, fe_cfg->buf_idx, &buf);
-		mutex_unlock(&vfe_dev->buf_mgr->lock);
 		if (rc < 0 || !buf) {
 			pr_err("%s: No fetch buffer rc= %d buf= %pK\n",
 				__func__, rc, buf);
+			mutex_unlock(&vfe_dev->buf_mgr->lock);
 			return -EINVAL;
 		}
 		mapped_info = buf->mapped_info[0];
 		buf->state = MSM_ISP_BUFFER_STATE_DISPATCHED;
+		mutex_unlock(&vfe_dev->buf_mgr->lock);
 	} else {
 		rc = vfe_dev->buf_mgr->ops->map_buf(vfe_dev->buf_mgr,
 			&mapped_info, fe_cfg->fd);
@@ -1947,7 +1951,7 @@ static void msm_vfe40_stats_cfg_wm_reg(
 	uint32_t stats_base = VFE40_STATS_BASE(stats_idx);
 
 	/*WR_ADDR_CFG*/
-	msm_camera_io_w(stream_info->framedrop_period << 2,
+	msm_camera_io_w((stream_info->framedrop_period - 1) << 2,
 		vfe_dev->vfe_base + stats_base + 0x8);
 	/*WR_IRQ_FRAMEDROP_PATTERN*/
 	msm_camera_io_w(stream_info->framedrop_pattern,

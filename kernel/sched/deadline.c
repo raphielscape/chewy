@@ -690,7 +690,7 @@ static void inc_dl_deadline(struct dl_rq *dl_rq, u64 deadline)
 		 */
 		dl_rq->earliest_dl.next = dl_rq->earliest_dl.curr;
 		dl_rq->earliest_dl.curr = deadline;
-		cpudl_set(&rq->rd->cpudl, rq->cpu, deadline, 1);
+		cpudl_set(&rq->rd->cpudl, rq->cpu, deadline);
 	} else if (dl_rq->earliest_dl.next == 0 ||
 		   dl_time_before(deadline, dl_rq->earliest_dl.next)) {
 		/*
@@ -714,7 +714,7 @@ static void dec_dl_deadline(struct dl_rq *dl_rq, u64 deadline)
 	if (!dl_rq->dl_nr_running) {
 		dl_rq->earliest_dl.curr = 0;
 		dl_rq->earliest_dl.next = 0;
-		cpudl_set(&rq->rd->cpudl, rq->cpu, 0, 0);
+		cpudl_clear(&rq->rd->cpudl, rq->cpu);
 	} else {
 		struct rb_node *leftmost = dl_rq->rb_leftmost;
 		struct sched_dl_entity *entry;
@@ -722,7 +722,7 @@ static void dec_dl_deadline(struct dl_rq *dl_rq, u64 deadline)
 		entry = rb_entry(leftmost, struct sched_dl_entity, rb_node);
 		dl_rq->earliest_dl.curr = entry->deadline;
 		dl_rq->earliest_dl.next = next_deadline(rq);
-		cpudl_set(&rq->rd->cpudl, rq->cpu, entry->deadline, 1);
+		cpudl_set(&rq->rd->cpudl, rq->cpu, entry->deadline);
 	}
 }
 
@@ -970,7 +970,7 @@ select_task_rq_dl(struct task_struct *p, int cpu, int sd_flag, int flags)
 	struct task_struct *curr;
 	struct rq *rq;
 
-	if (sd_flag != SD_BALANCE_WAKE && sd_flag != SD_BALANCE_FORK)
+	if (sd_flag != SD_BALANCE_WAKE)
 		goto out;
 
 	rq = cpu_rq(cpu);
@@ -1204,6 +1204,32 @@ next_node:
 	return NULL;
 }
 
+/*
+ * Return the earliest pushable rq's task, which is suitable to be executed
+ * on the CPU, NULL otherwise:
+ */
+static struct task_struct *pick_earliest_pushable_dl_task(struct rq *rq, int cpu)
+{
+	struct rb_node *next_node = rq->dl.pushable_dl_tasks_leftmost;
+	struct task_struct *p = NULL;
+
+	if (!has_pushable_dl_tasks(rq))
+		return NULL;
+
+next_node:
+	if (next_node) {
+		p = rb_entry(next_node, struct task_struct, pushable_dl_tasks);
+
+		if (pick_dl_task(rq, p, cpu))
+			return p;
+
+		next_node = rb_next(next_node);
+		goto next_node;
+	}
+
+	return NULL;
+}
+
 static DEFINE_PER_CPU(cpumask_var_t, local_cpu_mask_dl);
 
 static int find_later_rq(struct task_struct *task)
@@ -1224,9 +1250,6 @@ static int find_later_rq(struct task_struct *task)
 	 * We have to consider system topology and task affinity
 	 * first, then we can look for a suitable cpu.
 	 */
-	cpumask_copy(later_mask, task_rq(task)->rd->span);
-	cpumask_and(later_mask, later_mask, cpu_active_mask);
-	cpumask_and(later_mask, later_mask, &task->cpus_allowed);
 	best_cpu = cpudl_find(&task_rq(task)->rd->cpudl,
 			task, later_mask);
 	if (best_cpu == -1)
@@ -1492,7 +1515,7 @@ static int pull_dl_task(struct rq *this_rq)
 		if (src_rq->dl.dl_nr_running <= 1)
 			goto skip;
 
-		p = pick_next_earliest_dl_task(src_rq, this_cpu);
+		p = pick_earliest_pushable_dl_task(src_rq, this_cpu);
 
 		/*
 		 * We found a task to be pulled if:
@@ -1598,8 +1621,9 @@ static void rq_online_dl(struct rq *rq)
 	if (rq->dl.overloaded)
 		dl_set_overload(rq);
 
+	cpudl_set_freecpu(&rq->rd->cpudl, rq->cpu);
 	if (rq->dl.dl_nr_running > 0)
-		cpudl_set(&rq->rd->cpudl, rq->cpu, rq->dl.earliest_dl.curr, 1);
+		cpudl_set(&rq->rd->cpudl, rq->cpu, rq->dl.earliest_dl.curr);
 }
 
 /* Assumes rq->lock is held */
@@ -1608,7 +1632,8 @@ static void rq_offline_dl(struct rq *rq)
 	if (rq->dl.overloaded)
 		dl_clear_overload(rq);
 
-	cpudl_set(&rq->rd->cpudl, rq->cpu, 0, 0);
+	cpudl_clear(&rq->rd->cpudl, rq->cpu);
+	cpudl_clear_freecpu(&rq->rd->cpudl, rq->cpu);
 }
 
 void init_sched_dl_class(void)

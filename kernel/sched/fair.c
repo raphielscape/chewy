@@ -36,7 +36,7 @@
 
 /*
  * Targeted preemption latency for CPU-bound tasks:
- * (default: 6ms * (1 + ilog(ncpus)), units: nanoseconds)
+ * (default: 2ms * (1 + ilog(ncpus)), units: nanoseconds)
  *
  * NOTE: this latency value is not the same as the concept of
  * 'timeslice length' - timeslices in CFS are of variable length
@@ -46,8 +46,8 @@
  * (to see the precise effective timeslice length of your workload,
  *  run vmstat and monitor the context-switches (cs) field)
  */
-unsigned int sysctl_sched_latency = 3000000ULL;
-unsigned int normalized_sysctl_sched_latency = 3000000ULL;
+unsigned int sysctl_sched_latency = 2000000ULL;
+unsigned int normalized_sysctl_sched_latency = 2000000ULL;
 
 /*
  * The initial- and re-scaling of tunables is configurable
@@ -63,15 +63,15 @@ enum sched_tunable_scaling sysctl_sched_tunable_scaling
 
 /*
  * Minimal preemption granularity for CPU-bound tasks:
- * (default: 0.75 msec * (1 + ilog(ncpus)), units: nanoseconds)
+ * (default: 1 msec * (1 + ilog(ncpus)), units: nanoseconds)
  */
-unsigned int sysctl_sched_min_granularity = 300000ULL;
-unsigned int normalized_sysctl_sched_min_granularity = 300000ULL;
+unsigned int sysctl_sched_min_granularity = 1000000ULL;
+unsigned int normalized_sysctl_sched_min_granularity = 1000000ULL;
 
 /*
  * is kept at sysctl_sched_latency / sysctl_sched_min_granularity
  */
-static unsigned int sched_nr_latency = 10;
+static unsigned int sched_nr_latency = 2;
 
 /*
  * After fork, child runs first. If set to 0 (default) then
@@ -85,7 +85,7 @@ unsigned int sysctl_sched_child_runs_first __read_mostly;
  * per-task flag PF_WAKE_UP_IDLE can still cause a task to go to an
  * idle CPU upon being woken.
  */
-unsigned int __read_mostly sysctl_sched_wake_to_idle;
+unsigned int __read_mostly sysctl_sched_wake_to_idle = 0;
 
 /*
  * SCHED_OTHER wake-up granularity.
@@ -98,7 +98,7 @@ unsigned int __read_mostly sysctl_sched_wake_to_idle;
 unsigned int sysctl_sched_wakeup_granularity = 500000UL;
 unsigned int normalized_sysctl_sched_wakeup_granularity = 500000UL;
 
-const_debug unsigned int sysctl_sched_migration_cost = 250000UL;
+const_debug unsigned int sysctl_sched_migration_cost;
 
 /*
  * The exponential sliding  window over which load is averaged for shares
@@ -116,9 +116,9 @@ unsigned int __read_mostly sysctl_sched_shares_window = 10000000UL;
  * to consumption or the quota being specified to be smaller than the slice)
  * we will always only issue the remaining available time.
  *
- * default: 5 msec, units: microseconds
+ * default: 2 msec, units: microseconds
   */
-unsigned int sysctl_sched_cfs_bandwidth_slice = 3000UL;
+unsigned int sysctl_sched_cfs_bandwidth_slice = 2000UL;
 #endif
 
 static inline void update_load_add(struct load_weight *lw, unsigned long inc)
@@ -2416,8 +2416,8 @@ unsigned int __read_mostly sysctl_sched_downmigrate_pct = 60;
  * Tasks whose nice value is > sysctl_sched_upmigrate_min_nice are never
  * considered as "big" tasks.
  */
-static int __read_mostly sched_upmigrate_min_nice = 15;
-int __read_mostly sysctl_sched_upmigrate_min_nice = 15;
+static int __read_mostly sched_upmigrate_min_nice = 9;
+int __read_mostly sysctl_sched_upmigrate_min_nice = 9;
 
 /*
  * The load scale factor of a CPU gets boosted when its max frequency
@@ -2485,9 +2485,6 @@ void set_hmp_defaults(void)
 	update_up_down_migrate();
 
 #ifdef CONFIG_SCHED_FREQ_INPUT
-	sched_major_task_runtime =
-		mult_frac(sched_ravg_window, MAJOR_TASK_PCT, 100);
-
 	sched_freq_aggregate_threshold =
 		pct_to_real(sysctl_sched_freq_aggregate_threshold_pct);
 #endif
@@ -3358,7 +3355,8 @@ retry:
 		else if (stats.least_loaded_cpu >= 0)
 			target = stats.least_loaded_cpu;
 	} else if (stats.best_cpu >= 0) {
-		if (stats.best_cpu != task_cpu(p) &&
+		if (stats.best_sibling_cpu >= 0 &&
+				stats.best_cpu != task_cpu(p) &&
 				stats.min_cost == stats.best_sibling_cpu_cost)
 			stats.best_cpu = stats.best_sibling_cpu;
 
@@ -4756,7 +4754,7 @@ static void check_spread(struct cfs_rq *cfs_rq, struct sched_entity *se)
 }
 
 unsigned int Lgentle_fair_sleepers = 1;
-unsigned int Larch_power = 0;
+unsigned int Larch_power = 1;
 
 void relay_gfs(unsigned int gfs)
 {
@@ -5688,7 +5686,7 @@ static int runtime_refresh_within(struct cfs_bandwidth *cfs_b, u64 min_expire)
 	u64 remaining;
 
 	/* if the call-back is running a quota refresh is already occurring */
-	if (hrtimer_callback_running(refresh_timer))
+	if (hrtimer_callback_running_relaxed(refresh_timer))
 		return 1;
 
 	/* is a quota refresh about to occur? */
@@ -6286,7 +6284,7 @@ static long effective_load(struct task_group *tg, int cpu, long wl, long wg)
 		 * wl = S * s'_i; see (2)
 		 */
 		if (W > 0 && w < W)
-			wl = (w * tg->shares) / W;
+			wl = (w * (long)tg->shares) / W;
 		else
 			wl = tg->shares;
 

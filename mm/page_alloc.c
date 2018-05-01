@@ -787,6 +787,8 @@ static bool free_pages_prepare(struct page *page, unsigned int order)
 	int i;
 	int bad = 0;
 
+	unsigned long index = 1UL << order;
+
 	trace_mm_page_free(page, order);
 	kmemcheck_free_shadow(page, order);
 
@@ -803,6 +805,10 @@ static bool free_pages_prepare(struct page *page, unsigned int order)
 		debug_check_no_obj_freed(page_address(page),
 					   PAGE_SIZE << order);
 	}
+
+	for (; index; --index)
+		sanitize_highpage(page + index - 1);
+
 	arch_free_page(page, order);
 	kernel_map_pages(page, 1 << order, 0);
 	kasan_free_pages(page, order);
@@ -966,6 +972,8 @@ static int prep_new_page(struct page *page, unsigned int order, gfp_t gfp_flags)
 {
 	int i;
 
+	unsigned long index = 1UL << order;
+
 	for (i = 0; i < (1 << order); i++) {
 		struct page *p = page + i;
 		if (unlikely(check_new_page(p)))
@@ -979,8 +987,8 @@ static int prep_new_page(struct page *page, unsigned int order, gfp_t gfp_flags)
 	arch_alloc_page(page, order);
 	kernel_map_pages(page, 1 << order, 1);
 
-	if (gfp_flags & __GFP_ZERO)
-		prep_zero_page(page, order, gfp_flags);
+	for (; index; --index)
+		sanitize_highpage_verify(page + index - 1);
 
 	if (order && (gfp_flags & __GFP_COMP))
 		prep_compound_page(page, order);
@@ -1157,7 +1165,8 @@ static void change_pageblock_range(struct page *pageblock_page,
  * If we claim more than half of the pageblock, change pageblock's migratetype
  * as well.
  */
-static bool can_steal_fallback(unsigned int order, int start_mt)
+static bool can_steal_fallback(unsigned int current_order, unsigned int start_order,
+			       int start_mt, int fallback_mt)
 {
 	/*
 	 * Leaving this order check is intended, although there is
@@ -1166,12 +1175,17 @@ static bool can_steal_fallback(unsigned int order, int start_mt)
 	 * but, below check doesn't guarantee it and that is just heuristic
 	 * so could be changed anytime.
 	 */
-	if (order >= pageblock_order)
+	if (current_order >= pageblock_order)
 		return true;
 
-	if (order >= pageblock_order / 2 ||
+	/* don't let unmovable allocations cause migrations simply because of free pages */
+	if ((start_mt != MIGRATE_UNMOVABLE && current_order >= pageblock_order / 2) ||
+	        /* only steal reclaimable page blocks for unmovable allocations */
+	        (start_mt == MIGRATE_UNMOVABLE && fallback_mt != MIGRATE_MOVABLE && current_order >= pageblock_order / 2) ||
+	        /* reclaimable can steal aggressively */
 		start_mt == MIGRATE_RECLAIMABLE ||
-		start_mt == MIGRATE_UNMOVABLE ||
+		/* allow unmovable allocs up to 64K without migrating blocks */
+		(start_mt == MIGRATE_UNMOVABLE && start_order >= 5) ||
 		page_group_by_mobility_disabled)
 		return true;
 
@@ -1206,8 +1220,8 @@ static void steal_suitable_fallback(struct zone *zone, struct page *page,
 }
 
 /* Check whether there is a suitable fallback freepage with requested order. */
-static int find_suitable_fallback(struct free_area *area, unsigned int order,
-					int migratetype, bool *can_steal)
+static int find_suitable_fallback(struct free_area *area, unsigned int current_order,
+				  int migratetype, int start_order, bool *can_steal)
 {
 	int i;
 	int fallback_mt;
@@ -1224,7 +1238,7 @@ static int find_suitable_fallback(struct free_area *area, unsigned int order,
 		if (list_empty(&area->free_list[fallback_mt]))
 			continue;
 
-		if (can_steal_fallback(order, migratetype))
+		if (can_steal_fallback(current_order, start_order, migratetype, fallback_mt))
 			*can_steal = true;
 
 		return fallback_mt;
@@ -1249,7 +1263,7 @@ __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 				--current_order) {
 		area = &(zone->free_area[current_order]);
 		fallback_mt = find_suitable_fallback(area, current_order,
-				start_migratetype, &can_steal);
+			start_migratetype, order, &can_steal);
 		if (fallback_mt == -1)
 			continue;
 
@@ -2353,7 +2367,7 @@ void warn_alloc_failed(gfp_t gfp_mask, unsigned int order, const char *fmt, ...)
 	 * of allowed nodes.
 	 */
 	if (!(gfp_mask & __GFP_NOMEMALLOC))
-		if (test_thread_flag(TIF_MEMDIE) ||
+		if (test_thread_flag_relaxed(TIF_MEMDIE) ||
 		    (current->flags & (PF_MEMALLOC | PF_EXITING)))
 			filter &= ~SHOW_MEM_FILTER_NODES;
 	if (in_interrupt() || !(gfp_mask & __GFP_WAIT))
@@ -2732,7 +2746,7 @@ gfp_to_alloc_flags(gfp_t gfp_mask)
 			alloc_flags |= ALLOC_NO_WATERMARKS;
 		else if (!in_interrupt() &&
 				((current->flags & PF_MEMALLOC) ||
-				 unlikely(test_thread_flag(TIF_MEMDIE))))
+				 unlikely(test_thread_flag_relaxed(TIF_MEMDIE))))
 			alloc_flags |= ALLOC_NO_WATERMARKS;
 	}
 #ifdef CONFIG_CMA
@@ -2849,7 +2863,7 @@ rebalance:
 		goto nopage;
 
 	/* Avoid allocations with no watermarks from looping endlessly */
-	if (test_thread_flag(TIF_MEMDIE) && !(gfp_mask & __GFP_NOFAIL))
+	if (test_thread_flag_relaxed(TIF_MEMDIE) && !(gfp_mask & __GFP_NOFAIL))
 		goto nopage;
 
 	/*
